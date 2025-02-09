@@ -13,11 +13,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 app.use(cors());
 app.use(express.json());
 
-// Example route
-app.get("/", async (req, res) => {
-  const { data, error } = await supabase.from("teams").select("*");
-  if (error) return res.status(500).send(error);
-  res.json(data);
-});
+// got to route index
+app.use("/", require("./routes/index"));
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
