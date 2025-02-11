@@ -33,7 +33,7 @@ function App() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/")
+    axios.get("http://localhost:5000/teams")
       .then((response) => setData(response.data))
       .catch((error) => console.error(error));
   }, []);
@@ -43,7 +43,13 @@ function App() {
       <h1>Supabase Data</h1>
       <ul>
         {data.map((item, index) => (
-          <li key={index}>{JSON.stringify(item)}</li>
+          <li key={index}>
+            <h3>{item.name}</h3>
+            {item.logo_url && (
+              <img src={item.logo_url} alt={item.name} width="100" height="100" />
+            )}
+            <p>{JSON.stringify(item)}</p>
+          </li>
         ))}
       </ul>
     </div>
