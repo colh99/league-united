@@ -10,5 +10,7 @@ router.get("/", (req, res) => {
 // route to teams
 router.use("/teams", require("./teams"));
 
+// route to leagues
+router.use("/leagues", require("./leagues"));
 
 module.exports = router;
