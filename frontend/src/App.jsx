@@ -36,14 +36,20 @@ function App() {
 export default App
 
 */
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/home";
+import LeaguesPage from "./pages/leagues";
+import TeamsPage from "./pages/teams";
+import NotFound from "./pages/notFound";
 
-
-import TeamList from "./components/teamList";
 function App() {
   return (
-    <div>
-      <TeamList />
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/leagues" element={<LeaguesPage />} />
+      <Route path="/teams" element={<TeamsPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
