@@ -37,9 +37,6 @@ const TeamList = () => {
               <strong>Primary Venue:</strong> {entry.venues.name}
             </p>
             <p>
-              <strong>Manager:</strong> {entry.teams.manager_name}
-            </p>
-            <p>
               <strong>Email:</strong> {entry.teams.contact_email}
             </p>
           </div>

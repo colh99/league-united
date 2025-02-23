@@ -1,10 +1,12 @@
 import Header from "../components/header";
 import Footer from "../components/footer";
+import AllSeasonsList from "../components/allSeasonsList";
+
 function LeaguesPage() {
   return (
     <div>
       <Header />
-        <p>Leagues Page</p>
+      <AllSeasonsList />
       <Footer />
     </div>
   );

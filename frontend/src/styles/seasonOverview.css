@@ -1,0 +1,89 @@
+/* Fixtures and Results */
+.fixtures-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .fixture {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #f4f4f4;
+  }
+  
+  .fixture .date {
+    flex: 1 1 100%;
+    text-align: center;
+    margin: 0.5rem 0;
+  }
+  
+  .fixture .teams {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 100%;
+    margin: 0.5rem 0;
+  }
+  
+  .fixture .home-team,
+  .fixture .score,
+  .fixture .away-team {
+    margin: 0 0.5rem;
+  }
+
+  .fixture .score {
+    white-space: nowrap; /* Prevent line breaks */
+  }
+  
+  @media (min-width: 600px) {
+    .fixture .date {
+      flex: 1;
+      text-align: left;
+      margin: 0;
+    }
+  
+    .fixture .teams {
+      flex: 1;
+      justify-content: center;
+      margin: 0;
+    }
+  
+    .fixture .home-team,
+    .fixture .away-team {
+      text-align: center;
+    }
+  
+    .fixture .score {
+      text-align: center;
+      white-space: nowrap; /* Prevent line breaks */
+    }
+  }
+  
+  @media (min-width: 900px) {
+    .fixture {
+      flex-wrap: nowrap;
+    }
+  
+    .fixture .date {
+      flex: 2;
+    }
+  
+    .fixture .teams {
+      flex: 3;
+      justify-content: space-between; /* Adjust spacing */
+    }
+  
+    .fixture .home-team,
+    .fixture .away-team {
+      flex: 1;
+      white-space: normal; /* Allow line breaks */
+    }
+  
+    .fixture .score {
+      flex: 0 1 auto; /* Allow score to shrink if needed */
+      white-space: nowrap; /* Prevent line breaks */
+    }
+  }

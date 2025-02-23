@@ -1,0 +1,133 @@
+.league-table {
+    width: 100%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
+}
+
+.league-table th {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+}
+
+.league-table td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f4f4f4;
+    text-align: center;
+}
+
+.league-table tr:nth-child(even) {
+    background-color: #f4f4f4;
+}
+
+.league-table tr:last-child {
+    border-bottom: 2px solid #333;
+}
+
+.league-table img {
+    width: 1.5em; /* Adjust the size as needed */
+    height: 1.5em; /* Adjust the size as needed */
+    margin-right: 10px;
+}
+
+.league-table .team-cell {
+    display: flex;
+    align-items: center;
+}
+
+/* Highlight the points column */
+.league-table td.points {
+    font-weight: bold;
+    background-color: #e4e4e4;
+}
+
+/* Highlight the first place team */
+.league-table tr:first-child {
+    background-color: #4cecca;
+}
+
+.league-table th.position::after { content: "Position"; }
+.league-table th.team::after { content: "Team"; }
+.league-table th.points::after { content: "Points"; }
+.league-table th.goal-difference::after { content: "Goal Difference"; }
+.league-table th.goals-for::after { content: "Goals For"; }
+.league-table th.goals-against::after { content: "Goals Against"; }
+.league-table th.wins::after { content: "Wins"; }
+.league-table th.draws::after { content: "Draws"; }
+.league-table th.losses::after { content: "Losses"; }
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .league-table th,
+    .league-table td {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .league-table img {
+        width: 1em; /* Adjust the size as needed */
+        height: 1em; /* Adjust the size as needed */
+    }
+
+    .league-table .team-cell {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .league-table .team-cell img {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .league-table th.position::after { content: "Pos"; }
+    .league-table th.team::after { content: "Team"; }
+    .league-table th.points::after { content: "Pts"; }
+    .league-table th.goal-difference::after { content: "GD"; }
+    .league-table th.goals-for::after { content: "GF"; }
+    .league-table th.goals-against::after { content: "GA"; }
+    .league-table th.wins::after { content: "W"; }
+    .league-table th.draws::after { content: "D"; }
+    .league-table th.losses::after { content: "L"; }
+}
+
+@media (max-width: 480px) {
+    .league-table th,
+    .league-table td {
+        padding: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .league-table img {
+        width: 0.8em; /* Adjust the size as needed */
+        height: 0.8em; /* Adjust the size as needed */
+    }
+
+    .league-table .team-cell {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .league-table .team-cell img {
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    .league-table th.position::after { content: "P"; }
+    .league-table th.team::after { content: "Team"; }
+    .league-table th.points::after { content: "Pts"; }
+    .league-table th.goal-difference::after { content: "GD"; }
+    .league-table th.goals-for::after { content: "GF"; }
+    .league-table th.goals-against::after { content: "GA"; }
+    .league-table th.wins::after { content: "W"; }
+    .league-table th.draws::after { content: "D"; }
+    .league-table th.losses::after { content: "L"; }
+}

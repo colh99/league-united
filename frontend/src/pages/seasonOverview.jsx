@@ -1,15 +1,15 @@
-import TeamList from "../components/teamList";
 import Header from "../components/header";
 import Footer from "../components/footer";
+import SeasonOverview from "../components/seasonOverview";
 
-function TeamsPage() {
+function SeasonOverviewPage() {
   return (
     <div>
       <Header />
-        <TeamList />
+        <SeasonOverview />
       <Footer />
     </div>
   );
 }
 
-export default TeamsPage;
+export default SeasonOverviewPage;
