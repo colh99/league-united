@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getTeams } from "../api/teams.jsx"; // Import API function
+import { Link } from "react-router-dom";
 
 const TeamList = () => {
   const [teams, setTeams] = useState([]);
@@ -7,7 +8,7 @@ const TeamList = () => {
   useEffect(() => {
     const fetchTeams = async () => {
       const data = await getTeams();
-      console.log(data);
+      //console.log(data);
       setTeams(data);
     };
 
@@ -15,12 +16,12 @@ const TeamList = () => {
   }, []);
 
   return (
-    <div>
+    <div className="container">
       <h1>All Teams</h1>
       <div>
         {teams.map((entry, index) => (
           <div key={index}>
-            <h3>{entry.teams.name}</h3>
+            <h3><Link to={`/teams/${entry.teams.team_id}`}>{entry.teams.name}</Link></h3>
             <img
               src={entry.teams.logo_url}
               alt={entry.teams.name}

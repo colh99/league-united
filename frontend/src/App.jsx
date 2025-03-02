@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/home";
 import LeaguesPage from "./pages/leagues";
 import TeamsPage from "./pages/teams";
+import Team from "./pages/team";
 import NotFound from "./pages/notFound";
 import SeasonOverviewPage from "./pages/seasonOverview";
 
@@ -14,7 +15,7 @@ function App() {
       <Route path="/leagues/:league_id" element={<LeaguesPage />} />
       <Route path="/seasons/:season_id" element={<SeasonOverviewPage />} />
       <Route path="/teams" element={<TeamsPage />} />
-      <Route path="/teams/:team_id" element={<TeamsPage />} />
+      <Route path="/teams/:team_id" element={<Team />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

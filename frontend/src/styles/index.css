@@ -61,6 +61,21 @@ nav a:hover {
   padding: 20px;
 }
 
+/* Global container rule */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.component-container {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
 /* General Styling for Headers */
 h1, h2, h3, h4, h5, h6 {
   margin: 20px 0 10px;

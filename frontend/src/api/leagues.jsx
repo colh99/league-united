@@ -38,7 +38,7 @@ export const getSeasonOverview = async (season_id) => {
       throw new Error("Network response was not ok");
     }
     const data = await response.json(); // Parse the JSON response
-    console.log("Fetched season overview data:", data);
+    console.log("Fetched season overview data for", data.season.headline_year, data.league.name, data);
     return data;
   } catch (error) {
     console.error("Error fetching season overview:", error);

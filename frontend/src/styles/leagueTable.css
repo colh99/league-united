@@ -8,7 +8,7 @@
     color: #333;
     background-color: #fff;
     border-radius: 10px;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
 }
 
 .league-table th {
@@ -21,7 +21,6 @@
 
 .league-table td {
     padding: 0.5rem;
-    border-bottom: 1px solid #f4f4f4;
     text-align: center;
 }
 
@@ -41,13 +40,24 @@
 
 .league-table .team-cell {
     display: flex;
+    align-items: left;
+    text-align: left;
+}
+
+.league-table .team-cell a {
+    display: flex;
     align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.league-table .team-cell a:hover {
+    text-decoration: underline;
 }
 
 /* Highlight the points column */
 .league-table td.points {
     font-weight: bold;
-    background-color: #e4e4e4;
 }
 
 /* Highlight the first place team */
@@ -84,7 +94,7 @@
     }
 
     .league-table .team-cell img {
-        margin-right: 0;
+        margin-right: 0.1rem;
         margin-bottom: 0.5rem;
     }
 

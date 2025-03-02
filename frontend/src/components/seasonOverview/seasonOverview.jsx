@@ -1,9 +1,10 @@
-// filepath: /d:/User Libraries/Documents/School Work/2025 Winter/Senior Project/League United/frontend/src/components/SeasonOverview.jsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getSeasonOverview } from "../api/leagues.jsx"; // Import API function
-import "../styles/seasonOverview.css";
-import "../styles/leagueTable.css";
+import { getSeasonOverview } from "../../api/leagues.jsx"; // Import API function
+import LeagueTable from "./leagueTable";
+import FixturesList from "./fixturesList";
+import "../../styles/seasonOverview.css";
+import "../../styles/leagueTable.css";
 
 const SeasonOverview = () => {
   const { season_id } = useParams();
@@ -12,7 +13,7 @@ const SeasonOverview = () => {
   useEffect(() => {
     const fetchSeason = async () => {
       const data = await getSeasonOverview(season_id);
-      console.log(data);
+      //console.log(data);
       setSeason(data);
     };
 
@@ -37,7 +38,7 @@ const SeasonOverview = () => {
           match.home_team_id === team.teams.team_id ||
           match.away_team_id === team.teams.team_id
       );
-      // Filter for wins, draws, and losses
+
       const teamWins = teamMatches.filter((match) => {
         const report = season.reports.find(
           (report) => report.match_id === match.match_id
@@ -68,7 +69,7 @@ const SeasonOverview = () => {
             report.away_team_score < report.home_team_score)
         );
       });
-      // Filter for goals for and against, and calculate goal difference
+
       const goalsFor = teamMatches.reduce((total, match) => {
         const report = season.reports.find(
           (report) => report.match_id === match.match_id
@@ -93,13 +94,11 @@ const SeasonOverview = () => {
         );
       }, 0);
       const goalDifference = goalsFor - goalsAgainst;
-
-      // Calculate points
       const teamPoints = teamWins.length * 3 + teamDraws.length;
-      // Get the team logo
       const logo = team.teams.logo_url;
 
       return {
+        team_id: team.teams.team_id,
         logo: logo,
         team: team.teams.name,
         wins: teamWins.length,
@@ -111,7 +110,7 @@ const SeasonOverview = () => {
         points: teamPoints,
       };
     });
-    
+
     // Sort by points, then goal difference, then goals for, then wins
     leagueTable.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
@@ -127,80 +126,15 @@ const SeasonOverview = () => {
 
   // Display the season overview
   return (
-    <div>
+    <div className="container">
       <h1>{season.league.name}</h1>
       <h2>{season.season.headline_year} Season Overview</h2>
-
-      <h3>League Table</h3>
-      <table className="league-table">
-        <thead>
-          <tr>
-            <th className="position"></th>
-            <th className="team"></th>
-            <th className="points"></th>
-            <th className="goal-difference"></th>
-            <th className="goals-for"></th>
-            <th className="goals-against"></th>
-            <th className="wins"></th>
-            <th className="draws"></th>
-            <th className="losses"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {leagueTable.map((team) => (
-            <tr key={team.team}>
-              <td>{leagueTable.indexOf(team) + 1}</td>
-              <td className="team-cell">
-                <img src={team.logo} alt={team.team} width="50" height="50" />
-                {team.team}
-              </td>
-              <td className="points">{team.points}</td>
-              <td className="goal-difference">{team.goalDifference}</td>
-              <td className="goals-for">{team.goalsFor}</td>
-              <td className="goals_against">{team.goalsAgainst}</td>
-              <td className="wins">{team.wins}</td>
-              <td className="draws">{team.draws}</td>
-              <td className="losses">{team.losses}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <h3>Fixtures and Results</h3>
-      <ul className="fixtures-list">
-        {season.matches.map((match) => {
-          const report = season.reports.find(
-            (report) => report.match_id === match.match_id
-          );
-          const matchDate = new Date(match.match_date);
-          return (
-            <li key={match.match_id} className="fixture">
-              <p className="date">
-                {matchDate.toLocaleDateString()}{" "}
-                {matchDate.toLocaleTimeString([], {
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </p>
-              <div className="teams">
-                <p className="home-team">
-                  {getTeamNameById(match.home_team_id)}
-                </p>
-                {report ? (
-                  <p className="score">
-                    {report.home_team_score} - {report.away_team_score}
-                  </p>
-                ) : (
-                  <p className="score">vs</p>
-                )}
-                <p className="away-team">
-                  {getTeamNameById(match.away_team_id)}
-                </p>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      <LeagueTable leagueTable={leagueTable} />
+      <FixturesList
+        matches={season.matches}
+        reports={season.reports}
+        getTeamNameById={getTeamNameById}
+      />
     </div>
   );
 };

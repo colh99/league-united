@@ -11,7 +11,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    border-bottom: 1px solid #f4f4f4;
+    border-bottom: 1px solid #dadada;
+  }
+
+  .fixture:last-child {
+    border-bottom: none;
   }
   
   .fixture .date {

@@ -1,0 +1,137 @@
+/* Styles for the team page */
+
+/* Team Details */
+
+.team-details {
+  text-align: center;
+}
+
+.team-name {
+  font-size: 2.5rem;
+  color: #2c3e50; /* Dark blue color */
+  margin-bottom: 10px;
+}
+
+.team-overview {
+  font-size: 1.5rem;
+  color: #2980b9; /* Blue color */
+  margin-bottom: 20px;
+}
+
+.team-logo {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 20px;
+}
+
+.team-info {
+  font-size: 1rem;
+  color: #555; /* Dark grey color */
+  margin-bottom: 10px;
+}
+
+.team-info strong {
+  color: #2c3e50; /* Dark blue color */
+}
+
+/* Matches */
+
+.matches-title {
+  font-size: 1.5rem;
+  color: #2c3e50; /* Dark blue color */
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.matches-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.match-item {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.match-date {
+  font-size: 1rem;
+  color: #555; /* Dark grey color */
+}
+
+.match-opponent {
+  font-size: 1rem;
+  color: #2980b9; /* Blue color */
+}
+
+.match-venue {
+  font-size: 0.9rem;
+  color: #777; /* Lighter grey color */
+  text-align: right;
+}
+
+/* Roster */
+
+.roster-title {
+  font-size: 1.5rem;
+  color: #2c3e50; /* Dark blue color */
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.roster-list {
+  list-style-type: none;
+  padding: 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.roster-item {
+  background-color: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roster-item:nth-child(even) {
+  background-color: #f4f4f4;
+}
+
+.roster-number {
+  font-size: 1rem;
+  color: #555; /* Dark grey color */
+  flex: 1;
+  text-align: left;
+  font-weight: bold;
+}
+
+.roster-name {
+  font-size: 1rem;
+  color: #2c3e50; /* Dark blue color */
+  flex: 2;
+  text-align: left;
+}
+
+.roster-last-name {
+  font-weight: bold;
+}
+
+.roster-known-as {
+  color: #777; /* Lighter grey color */
+  margin-left: 5px;
+}
+
+.roster-position {
+  font-size: 1rem;
+  color: #555; /* Dark grey color */
+  flex: 1;
+  text-align: right;
+}
