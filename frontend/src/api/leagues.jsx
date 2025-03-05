@@ -45,3 +45,19 @@ export const getSeasonOverview = async (season_id) => {
     return [];
   }
 }
+
+export const getLeagueById = async (league_id) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/leagues/${league_id}`);
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Fetched league data for", data.league.name, data);
+    return data;
+  }
+  catch (error) {
+    console.error("Error fetching league:", error);
+    return {};
+  }
+}

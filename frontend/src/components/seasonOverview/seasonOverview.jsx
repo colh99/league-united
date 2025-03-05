@@ -1,24 +1,22 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getSeasonOverview } from "../../api/leagues.jsx"; // Import API function
-import LeagueTable from "./leagueTable";
-import FixturesList from "./fixturesList";
+import { getSeasonOverview } from "../../api/leagues"; // Import API function
+import LeagueTable from "./leagueTable.jsx";
+import FixturesList from "./fixturesList.jsx";
 import "../../styles/seasonOverview.css";
 import "../../styles/leagueTable.css";
+import PropTypes from "prop-types";
 
-const SeasonOverview = () => {
-  const { season_id } = useParams();
+const SeasonOverview = ({ seasons, selectedSeason, onSeasonChange }) => {
   const [season, setSeason] = useState(null);
 
   useEffect(() => {
     const fetchSeason = async () => {
-      const data = await getSeasonOverview(season_id);
-      //console.log(data);
+      const data = await getSeasonOverview(selectedSeason);
       setSeason(data);
     };
 
     fetchSeason();
-  }, [season_id]);
+  }, [selectedSeason]);
 
   if (!season) {
     return <div>Loading...</div>;
@@ -114,7 +112,8 @@ const SeasonOverview = () => {
     // Sort by points, then goal difference, then goals for, then wins
     leagueTable.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
-      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+      if (b.goalDifference !== a.goalDifference)
+        return b.goalDifference - a.goalDifference;
       if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
       return b.wins - a.wins;
     });
@@ -124,19 +123,44 @@ const SeasonOverview = () => {
 
   const leagueTable = createLeagueTable(); // Call the function to create the league table
 
-  // Display the season overview
   return (
-    <div className="container">
-      <h1>{season.league.name}</h1>
-      <h2>{season.season.headline_year} Season Overview</h2>
-      <LeagueTable leagueTable={leagueTable} />
-      <FixturesList
-        matches={season.matches}
-        reports={season.reports}
-        getTeamNameById={getTeamNameById}
-      />
+    <div className="season-overview">
+      <div className="component-container">
+        <div>
+          <label htmlFor="season-select">Select Season: </label>
+          <select
+            id="season-select"
+            value={selectedSeason}
+            onChange={(e) => onSeasonChange(e.target.value)}
+          >
+            {seasons.map((season) => (
+              <option key={season.season_id} value={season.season_id}>
+                {season.headline_year}
+              </option>
+            ))}
+          </select>
+        </div>
+        <h2>{season.season.headline_year} Season Overview</h2>
+        <LeagueTable leagueTable={leagueTable} />
+        <FixturesList
+          matches={season.matches}
+          reports={season.reports}
+          getTeamNameById={getTeamNameById}
+        />
+      </div>
     </div>
   );
+};
+
+SeasonOverview.propTypes = {
+  seasons: PropTypes.arrayOf(
+    PropTypes.shape({
+      season_id: PropTypes.number.isRequired,
+      headline_year: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  selectedSeason: PropTypes.number.isRequired,
+  onSeasonChange: PropTypes.func.isRequired,
 };
 
 export default SeasonOverview;

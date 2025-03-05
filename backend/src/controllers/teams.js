@@ -66,11 +66,11 @@ const getTeamById = async (req, res) => {
     return res.status(400).json({ error: previousError.message });
   }
 
-  const { data: venuesData, error: venueError } = await supabase
+  const { data: venueData, error: venueError } = await supabase
     .from("teams_venues")
-    .select("venues(*), is_primary")
+    .select("venues(*)")
     .eq("team_id", team_id)
-    .eq("is_primary", true)
+    .eq("is_primary", true) // Only gets the primary venue
     .single();
 
   if (venueError) {
@@ -92,7 +92,7 @@ const getTeamById = async (req, res) => {
     roster: rosterData,
     previousMatches: previousMatchesData,
     upcomingMatches: upcomingMatchesData,
-    venues: venuesData,
+    primaryVenue: venueData,
     manager: managerData,
   });
 };

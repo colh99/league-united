@@ -94,4 +94,34 @@ const getSeasonOverview = async (req, res) => {
   }
 };
 
-module.exports = { getAllLeagues, getAllSeasons, getSeasonOverview };
+// Get all data for a single league page
+const getLeagueById = async (req, res) => {
+  try {
+    // League data
+    const { data: leagueData, error: leagueError } = await supabase
+      .from("leagues")
+      .select("*")
+      .eq("league_id", req.params.id)
+      .single();
+    if (leagueError) {
+      throw leagueError;
+    }
+    // Seasons for the league
+    const { data: seasonsData, error: seasonsError } = await supabase
+      .from("seasons")
+      .select("*")
+      .eq("league_id", req.params.id);
+    if (seasonsError) {
+      throw seasonsError;
+    }
+    res.status(200).json({
+      league: leagueData,
+      seasons: seasonsData,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+module.exports = { getAllLeagues, getAllSeasons, getSeasonOverview, getLeagueById };

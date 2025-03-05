@@ -1,23 +1,27 @@
 import PropTypes from "prop-types";
+import "../../styles/details.css";
 
-const TeamDetails = ({ team, manager }) => {
+const TeamDetails = ({ team, manager, venue }) => {
   return (
     <div className="component-container">
-      <div className="team-details">
-        <h1 className="team-name">{team.name}</h1>
-        <h2 className="team-overview">Team Overview</h2>
-        <img className="team-logo" src={team.logo_url} alt={team.name} />
-        <p className="team-info">
+      <div className="details">
+        <h1 className="name">{team.name}</h1>
+        <h2 className="overview">Team Overview</h2>
+        <img className="logo" src={team.logo_url} alt={team.name} />
+        <p className="info">
           <strong>Nickname:</strong> {team.nickname}
         </p>
-        <p className="team-info">
+        <p className="info">
           <strong>Founded:</strong> {team.founded_year}
         </p>
-        <p className="team-info">
+        <p className="info">
           <strong>Email:</strong> {team.contact_email}
         </p>
-        <p className="team-info">
+        <p className="info">
           <strong>Manager:</strong> {manager.full_name}
+        </p>
+        <p className="info">
+          <strong>Venue:</strong> {venue.venues.name}
         </p>
       </div>
     </div>
@@ -34,6 +38,11 @@ TeamDetails.propTypes = {
   }).isRequired,
   manager: PropTypes.shape({
     full_name: PropTypes.string.isRequired,
+  }).isRequired,
+  venue: PropTypes.shape({
+    venues: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+    }).isRequired,
   }).isRequired,
 };
 
