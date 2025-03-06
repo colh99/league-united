@@ -19,6 +19,12 @@ h1 {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.league-logo {
+  display: block;
+  margin-bottom: 20px;
+  width: 100px;
+}
+
 .league h2 {
   color: #2980b9; /* Blue color */
   margin-bottom: 10px;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllSeasons } from "../api/leagues.jsx"; // Import API function
 import { Link } from "react-router-dom";
-import "../styles/allSeasonsList.css";
+import "../styles/allLeaguesList.css";
 
 const AllSeasonsList = () => {
   const [seasons, setSeasons] = useState([]);

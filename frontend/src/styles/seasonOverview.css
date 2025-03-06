@@ -94,7 +94,6 @@
 
   .logo {
     width: 100px;
-    height: 100px;
     margin: 20px auto; /* Center align horizontally */
     display: block; /* Make the image a block element */
   }

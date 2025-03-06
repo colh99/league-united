@@ -91,6 +91,8 @@ const SeasonOverview = ({ seasons, selectedSeason, onSeasonChange }) => {
             : report.home_team_score)
         );
       }, 0);
+
+      const gamesPlayed = teamWins.length + teamDraws.length + teamLosses.length;
       const goalDifference = goalsFor - goalsAgainst;
       const teamPoints = teamWins.length * 3 + teamDraws.length;
       const logo = team.teams.logo_url;
@@ -99,6 +101,7 @@ const SeasonOverview = ({ seasons, selectedSeason, onSeasonChange }) => {
         team_id: team.teams.team_id,
         logo: logo,
         team: team.teams.name,
+        gamesPlayed: gamesPlayed,
         wins: teamWins.length,
         draws: teamDraws.length,
         losses: teamLosses.length,

@@ -1,7 +1,7 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-export const getLeagues = async () => {
+export const getAllLeagues = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/leagues`);
     if (!response.ok) {

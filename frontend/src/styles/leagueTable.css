@@ -1,5 +1,6 @@
 .league-table {
     width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     border-collapse: collapse;
     border-spacing: 0;
@@ -9,6 +10,12 @@
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Added to make table scrollable on small screens */
+}
+
+.league-table-container {
+    width: 100%;
+    overflow-x: auto; /* Added to make table scrollable on small screens */
 }
 
 .league-table th {
@@ -67,6 +74,7 @@
 
 .league-table th.position::after { content: "Position"; }
 .league-table th.team::after { content: "Team"; }
+.league-table th.games-played::after { content: "Games Played"; }
 .league-table th.points::after { content: "Points"; }
 .league-table th.goal-difference::after { content: "Goal Difference"; }
 .league-table th.goals-for::after { content: "Goals For"; }
@@ -100,6 +108,7 @@
 
     .league-table th.position::after { content: "Pos"; }
     .league-table th.team::after { content: "Team"; }
+    .league-table th.games-played::after { content: "GP"; }
     .league-table th.points::after { content: "Pts"; }
     .league-table th.goal-difference::after { content: "GD"; }
     .league-table th.goals-for::after { content: "GF"; }
@@ -133,6 +142,7 @@
 
     .league-table th.position::after { content: "P"; }
     .league-table th.team::after { content: "Team"; }
+    .league-table th.games-played::after { content: "GP"; }
     .league-table th.points::after { content: "Pts"; }
     .league-table th.goal-difference::after { content: "GD"; }
     .league-table th.goals-for::after { content: "GF"; }
