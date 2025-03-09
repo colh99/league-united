@@ -59,7 +59,7 @@ LeagueTable.propTypes = {
       wins: PropTypes.number.isRequired,
       draws: PropTypes.number.isRequired,
       losses: PropTypes.number.isRequired,
-      gamesPlayed: PropTypes.number.isRequired, // Added prop type
+      gamesPlayed: PropTypes.number.isRequired,
     })
   ).isRequired,
 };
