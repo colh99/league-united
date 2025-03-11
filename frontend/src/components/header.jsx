@@ -11,13 +11,24 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const Header = () => {
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        setLoading(false);
+      } else {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          localStorage.setItem("user", JSON.stringify(user));
+        }
+        setUser(user);
+        setLoading(false);
+      }
     };
 
     fetchUser();
@@ -26,23 +37,30 @@ const Header = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <header className="header">
       <div className="header-container">
-        <h1 className="header-title">League United</h1>
+        <h1 className="header-title"><Link to="/">League United</Link></h1>
         <button className="menu-toggle" onClick={toggleMenu}>
           {menuOpen ? "✖" : "☰"}
         </button>
         <nav className={`nav ${menuOpen ? "open" : ""}`}>
-          <Link to="/">Home</Link>
-          <Link to="/leagues">Leagues</Link>
-          <Link to="/teams">Teams</Link>
+          <div className="nav-links">
+            <Link to="/">Home</Link>
+            <Link to="/leagues">Leagues</Link>
+            <Link to="/teams">Teams</Link>
+          </div>
           <div className="auth-buttons">
             {user ? (
               <>

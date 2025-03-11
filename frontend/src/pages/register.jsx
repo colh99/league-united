@@ -2,6 +2,7 @@ import Header from "../components/header";
 import Footer from "../components/footer";
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { Link } from "react-router-dom";
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -44,21 +45,27 @@ const Register = () => {
       <div className="container">
         <h2>Register</h2>
         <form onSubmit={handleSignUp}>
+          <label htmlFor="name">Name</label>
           <input
+            id="name"
             type="text"
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
+          <label htmlFor="email">Email</label>
           <input
+            id="email"
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
+          <label htmlFor="password">Password</label>
           <input
+            id="password"
             type="password"
             placeholder="Password"
             value={password}
@@ -69,6 +76,7 @@ const Register = () => {
         </form>
         {error && <p style={{ color: "red" }}>{error}</p>}
         {success && <p style={{ color: "green" }}>{success}</p>}
+        <p>Already have an account? <Link to="/login">Login here.</Link></p>
       </div>
       <Footer />
     </div>
