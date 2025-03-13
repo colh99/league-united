@@ -8,6 +8,7 @@ import LeaguesPage from "./pages/leagues";
 import LeaguePage from "./pages/league";
 import TeamsPage from "./pages/teams";
 import TeamPage from "./pages/team";
+import MatchPage from "./pages/match";
 import NotFound from "./pages/notFound";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
       <Route path="/leagues/:league_id" element={<LeaguePage />} />
       <Route path="/teams" element={<TeamsPage />} />
       <Route path="/teams/:team_id" element={<TeamPage />} />
+      <Route path="/matches/:match_id" element={<MatchPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

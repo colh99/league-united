@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 const FixturesList = ({ matches, reports, getTeamNameById }) => {
   return (
@@ -11,30 +12,32 @@ const FixturesList = ({ matches, reports, getTeamNameById }) => {
           );
           const matchDate = new Date(match.match_date);
           return (
-            <li key={match.match_id} className="fixture">
-              <p className="date">
-                {matchDate.toLocaleDateString()}{" "}
-                {matchDate.toLocaleTimeString([], {
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </p>
-              <div className="teams">
-                <p className="home-team">
-                  {getTeamNameById(match.home_team_id)}
+            <Link to={`/matches/${match.match_id}`} key={match.match_id}>
+              <li key={match.match_id} className="fixture">
+                <p className="date">
+                  {matchDate.toLocaleDateString()}{" "}
+                  {matchDate.toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
                 </p>
-                {report ? (
-                  <p className="score">
-                    {report.home_team_score} - {report.away_team_score}
+                <div className="teams">
+                  <p className="home-team">
+                    {getTeamNameById(match.home_team_id)}
                   </p>
-                ) : (
-                  <p className="score">vs</p>
-                )}
-                <p className="away-team">
-                  {getTeamNameById(match.away_team_id)}
-                </p>
-              </div>
-            </li>
+                  {report ? (
+                    <p className="score">
+                      {report.home_team_score} - {report.away_team_score}
+                    </p>
+                  ) : (
+                    <p className="score">vs</p>
+                  )}
+                  <p className="away-team">
+                    {getTeamNameById(match.away_team_id)}
+                  </p>
+                </div>
+              </li>
+            </Link>
           );
         })}
       </ul>

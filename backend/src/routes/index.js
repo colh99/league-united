@@ -13,4 +13,7 @@ router.use("/teams", require("./teams"));
 // route to leagues
 router.use("/leagues", require("./leagues"));
 
+// route to matches
+router.use("/matches", require("./matches"));
+
 module.exports = router;
