@@ -3,6 +3,8 @@ import goalIcon from "../../assets/icons/goal-icon.webp"; // Adjust the path as 
 import yellowCardIcon from "../../assets/icons/yellow-card-icon.webp"; // Adjust the path as needed
 import redCardIcon from "../../assets/icons/red-card-icon.webp"; // Adjust the path as needed
 import assistIcon from "../../assets/icons/assist-icon.webp"; // Adjust the path as needed
+import subOnIcon from "../../assets/icons/sub-on-icon.webp"; // Adjust the path as needed
+import subOffIcon from "../../assets/icons/sub-off-icon.webp"; // Adjust the path as needed
 
 const TeamRosters = ({ match }) => {
   const positionOrder = {
@@ -33,7 +35,7 @@ const TeamRosters = ({ match }) => {
     )
   );
 
-  const getPlayerIcons = (player_id) => {
+  const getPlayerIcons = (player_id, is_starter) => {
     const icons = [];
 
     match.match_report.goals.forEach((goal) => {
@@ -51,21 +53,44 @@ const TeamRosters = ({ match }) => {
       }
     });
 
+    match.match_rosters.forEach((roster) => {
+      if (roster.player_id === player_id && roster.substitution_time !== null) {
+        icons.push(is_starter ? subOffIcon : subOnIcon);
+      }
+    });
+
     return icons;
   };
 
-  const renderTeamRoster = (teamRoster, teamName, teamId) => (
-    <div className="team-roster">
-      <h4>{teamName}</h4>
-      <ul>
-        {teamRoster.map((roster) => (
-          <li key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}>
-            #{roster.jersey_number} {roster.player.first_name} <strong>{roster.player.last_name}</strong> - {roster.position}
-            {getPlayerIcons(roster.player_id).map((icon, index) => (
-              <img key={index} src={icon} alt="icon" style={{ width: "15px", marginLeft: "5px" }} />
-            ))}
-          </li>
-        ))}
+  const renderTeamRoster = (teamRoster, teamName, teamId) => {
+    const starters = teamRoster.filter((roster) => roster.is_starter);
+    const substitutes = teamRoster.filter((roster) => !roster.is_starter);
+
+    return (
+      <div className="team-roster">
+        <h4>{teamName}</h4>
+        <h5>Starters</h5>
+        <ul>
+          {starters.map((roster) => (
+            <li key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}>
+              #{roster.jersey_number} {roster.player.first_name} <strong>{roster.player.last_name}</strong> - {roster.position}
+              {getPlayerIcons(roster.player_id, true).map((icon, index) => (
+                <img key={index} src={icon} alt="icon" style={{ width: "15px", marginLeft: "5px" }} />
+              ))}
+            </li>
+          ))}
+        </ul>
+        <h5>Substitutes</h5>
+        <ul>
+          {substitutes.map((roster) => (
+            <li key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}>
+              #{roster.jersey_number} {roster.player.first_name} <strong>{roster.player.last_name}</strong> - {roster.position}
+              {getPlayerIcons(roster.player_id, false).map((icon, index) => (
+                <img key={index} src={icon} alt="icon" style={{ width: "15px", marginLeft: "5px" }} />
+              ))}
+            </li>
+          ))}
+        </ul>
         {match.match_managers
           .filter((manager) => manager.team_id === teamId)
           .map((manager) => (
@@ -73,9 +98,9 @@ const TeamRosters = ({ match }) => {
               Manager: {manager.manager.first_name} {manager.manager.last_name}
             </li>
           ))}
-      </ul>
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
     <div className="component-container">
@@ -101,6 +126,8 @@ TeamRosters.propTypes = {
           first_name: PropTypes.string.isRequired,
         }).isRequired,
         position: PropTypes.string.isRequired,
+        is_starter: PropTypes.bool.isRequired,
+        substitution_time: PropTypes.string,
       })
     ).isRequired,
     home_team: PropTypes.shape({

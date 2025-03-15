@@ -33,8 +33,8 @@ function MatchPage() {
         <h1>Match Hub</h1>
         <MatchDetails match={match} />
         <MatchReport match={match} />
-        <MatchOfficials officials={match.match_officials} />
         <TeamRosters match={match} />
+        <MatchOfficials officials={match.match_officials} />
       </div>
       <Footer />
     </div>

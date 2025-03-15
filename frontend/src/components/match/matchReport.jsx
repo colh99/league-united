@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import goalIcon from "../../assets/icons/goal-icon.webp"; // Adjust the path as needed
 import yellowCardIcon from "../../assets/icons/yellow-card-icon.webp"; // Adjust the path as needed
 import redCardIcon from "../../assets/icons/red-card-icon.webp"; // Adjust the path as needed
+import subIcon from "../../assets/icons/sub-icon.webp"; // Adjust the path as needed
 
 const MatchReport = ({ match }) => {
   const getPlayerName = (player_id) => {
@@ -30,7 +31,9 @@ const MatchReport = ({ match }) => {
       minuteText: `${goal.goal_minute}'`,
       playerName: getPlayerName(goal.player_id),
       teamName: getTeamName(goal.team_id),
-      assistText: goal.assist_player_id ? ` (assisted by ${getPlayerName(goal.assist_player_id)})` : "",
+      assistText: goal.assist_player_id
+        ? ` (assisted by ${getPlayerName(goal.assist_player_id)})`
+        : "",
     })) || []),
     ...(match.match_report?.bookings.map((booking) => ({
       type: "booking",
@@ -41,9 +44,37 @@ const MatchReport = ({ match }) => {
       playerName: getPlayerName(booking.player_id),
       teamName: getTeamName(booking.team_id),
     })) || []),
+    ...(match.match_rosters
+      .filter((roster) => roster.substitution_time !== null)
+      .reduce((acc, roster) => {
+        const minute = parseInt(roster.substitution_time, 10);
+        const existingSub = acc.find((sub) => sub.minute === minute && sub.teamName === getTeamName(roster.team_id));
+        if (existingSub) {
+          if (roster.is_starter) {
+            existingSub.playersOff.push(getPlayerName(roster.player_id));
+          } else {
+            existingSub.playersOn.push(getPlayerName(roster.player_id));
+          }
+        } else {
+          acc.push({
+            type: "substitution",
+            minute,
+            icon: subIcon,
+            minuteText: `${minute}'`,
+            teamName: getTeamName(roster.team_id),
+            playersOn: roster.is_starter ? [] : [getPlayerName(roster.player_id)],
+            playersOff: roster.is_starter ? [getPlayerName(roster.player_id)] : [],
+          });
+        }
+        return acc;
+      }, []) || []),
   ].sort((a, b) => {
     if (a.minute === b.minute) {
-      return a.type === "booking" ? -1 : 1;
+      if (a.type === "booking") return -1;
+      if (b.type === "booking") return 1;
+      if (a.type === "substitution") return -1;
+      if (b.type === "substitution") return 1;
+      return 0;
     }
     return a.minute - b.minute;
   });
@@ -52,21 +83,56 @@ const MatchReport = ({ match }) => {
     <div className="component-container">
       {match.match_report && (
         <>
+          <h3>Result</h3>
+          <p>
+            {match.home_team.name} {match.match_report.home_team_score} -{" "}
+            {match.match_report.away_team_score} {match.away_team.name}
+          </p>
           <h3>Match Facts</h3>
           <ul>
             {matchFacts.map((fact, index) => (
               <li key={index}>
-                <img src={fact.icon} alt={fact.type} style={{ width: "15px", marginRight: "10px" }} />
+                <img
+                  src={fact.icon}
+                  alt={fact.type}
+                  style={{ width: "15px", marginRight: "10px" }}
+                />
                 <span className="minute">{fact.minuteText} </span>
                 <span className="description">
                   {fact.type === "goal" ? (
                     <>
-                      <strong>Goal!</strong> - <span className="fact-team-name">{fact.teamName}</span> - Scored by <span className="fact-player-name">{fact.playerName}</span>
-                      {fact.assistText && <span className="assist">{fact.assistText}</span>}
+                      <strong>Goal!</strong> -{" "}
+                      <span className="fact-team-name">{fact.teamName}</span> -
+                      Scored by{" "}
+                      <span className="fact-player-name">
+                        {fact.playerName}
+                      </span>
+                      {fact.assistText && (
+                        <span className="assist">{fact.assistText}</span>
+                      )}
+                    </>
+                  ) : fact.type === "booking" ? (
+                    <>
+                      <strong>{fact.cardType} Card</strong> -{" "}
+                      <span className="fact-player-name">
+                        {fact.playerName}
+                      </span>{" "}
+                      (<span className="fact-team-name">{fact.teamName}</span>)
                     </>
                   ) : (
                     <>
-                      <strong>{fact.cardType} Card</strong> - <span className="fact-player-name">{fact.playerName}</span> (<span className="fact-team-name">{fact.teamName}</span>)
+                      <strong>Substitution</strong> -{" "}
+                      <span className="fact-team-name">{fact.teamName}</span>:
+                      <br />
+                      <strong>On:</strong>{" "}
+                      <span className="fact-player-name">
+                        {fact.playersOn.join(", ")}
+                      </span>
+                      <br />
+                      <strong>Off:</strong>{" "}
+                      <span className="fact-player-name">
+                        {fact.playersOff.join(", ")}
+                      </span>
                     </>
                   )}
                 </span>
@@ -90,6 +156,8 @@ MatchReport.propTypes = {
           first_name: PropTypes.string.isRequired,
           last_name: PropTypes.string.isRequired,
         }).isRequired,
+        substitution_time: PropTypes.string,
+        is_starter: PropTypes.bool.isRequired,
       })
     ).isRequired,
     home_team: PropTypes.shape({

@@ -11,15 +11,6 @@ const MatchDetails = ({ match }) => {
       </h2>
       <h3>{new Date(match.match_date).toLocaleDateString()}</h3>
       <p>{match.venue.name}</p>
-      {match.match_report && (
-        <>
-          <h3>Score</h3>
-          <p>
-            {match.match_report.home_team_score} -{" "}
-            {match.match_report.away_team_score}
-          </p>
-        </>
-      )}
     </div>
   );
 };
