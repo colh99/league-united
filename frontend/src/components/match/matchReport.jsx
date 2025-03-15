@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
-import goalIcon from "../../assets/icons/goal-icon.png"; // Adjust the path as needed
-import yellowCardIcon from "../../assets/icons/yellow-card-icon.png"; // Adjust the path as needed
-import redCardIcon from "../../assets/icons/red-card-icon.png"; // Adjust the path as needed
+import goalIcon from "../../assets/icons/goal-icon.webp"; // Adjust the path as needed
+import yellowCardIcon from "../../assets/icons/yellow-card-icon.webp"; // Adjust the path as needed
+import redCardIcon from "../../assets/icons/red-card-icon.webp"; // Adjust the path as needed
 
 const MatchReport = ({ match }) => {
   const getPlayerName = (player_id) => {
@@ -27,41 +27,54 @@ const MatchReport = ({ match }) => {
       type: "goal",
       minute: goal.goal_minute,
       icon: goalIcon,
-      description: `${goal.goal_minute}' Goal - ${getPlayerName(
-        goal.player_id
-      )} for ${getTeamName(goal.team_id)} ${
-        goal.assist_player_id
-          ? ` (assisted by ${getPlayerName(goal.assist_player_id)})`
-          : ""
-      }`,
+      minuteText: `${goal.goal_minute}'`,
+      playerName: getPlayerName(goal.player_id),
+      teamName: getTeamName(goal.team_id),
+      assistText: goal.assist_player_id ? ` (assisted by ${getPlayerName(goal.assist_player_id)})` : "",
     })) || []),
     ...(match.match_report?.bookings.map((booking) => ({
       type: "booking",
       minute: booking.booking_minute,
       icon: booking.card_type === "yellow" ? yellowCardIcon : redCardIcon,
-      description: `${booking.booking_minute}' ${
-        booking.card_type === "yellow" ? "Yellow" : "Red"
-      } Card - ${getPlayerName(booking.player_id)} (${getTeamName(
-        booking.team_id
-      )})`,
+      minuteText: `${booking.booking_minute}'`,
+      cardType: booking.card_type === "yellow" ? "Yellow" : "Red",
+      playerName: getPlayerName(booking.player_id),
+      teamName: getTeamName(booking.team_id),
     })) || []),
-  ].sort((a, b) => a.minute - b.minute);
+  ].sort((a, b) => {
+    if (a.minute === b.minute) {
+      return a.type === "booking" ? -1 : 1;
+    }
+    return a.minute - b.minute;
+  });
 
   return (
     <div className="component-container">
       {match.match_report && (
         <>
-          <h3>Official&apos;s Notes</h3>
-          <p>{match.match_report.notes}</p>
           <h3>Match Facts</h3>
           <ul>
             {matchFacts.map((fact, index) => (
               <li key={index}>
                 <img src={fact.icon} alt={fact.type} style={{ width: "15px", marginRight: "10px" }} />
-                {fact.description}
+                <span className="minute">{fact.minuteText} </span>
+                <span className="description">
+                  {fact.type === "goal" ? (
+                    <>
+                      <strong>Goal!</strong> - <span className="fact-team-name">{fact.teamName}</span> - Scored by <span className="fact-player-name">{fact.playerName}</span>
+                      {fact.assistText && <span className="assist">{fact.assistText}</span>}
+                    </>
+                  ) : (
+                    <>
+                      <strong>{fact.cardType} Card</strong> - <span className="fact-player-name">{fact.playerName}</span> (<span className="fact-team-name">{fact.teamName}</span>)
+                    </>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
+          <h3>Official&apos;s Notes</h3>
+          <p>{match.match_report.notes}</p>
         </>
       )}
     </div>

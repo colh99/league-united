@@ -1,4 +1,8 @@
 import PropTypes from 'prop-types';
+import goalIcon from "../../assets/icons/goal-icon.webp"; // Adjust the path as needed
+import yellowCardIcon from "../../assets/icons/yellow-card-icon.webp"; // Adjust the path as needed
+import redCardIcon from "../../assets/icons/red-card-icon.webp"; // Adjust the path as needed
+import assistIcon from "../../assets/icons/assist-icon.webp"; // Adjust the path as needed
 
 const TeamRosters = ({ match }) => {
   const positionOrder = {
@@ -29,6 +33,27 @@ const TeamRosters = ({ match }) => {
     )
   );
 
+  const getPlayerIcons = (player_id) => {
+    const icons = [];
+
+    match.match_report.goals.forEach((goal) => {
+      if (goal.player_id === player_id) {
+        icons.push(goalIcon);
+      }
+      if (goal.assist_player_id === player_id) {
+        icons.push(assistIcon);
+      }
+    });
+
+    match.match_report.bookings.forEach((booking) => {
+      if (booking.player_id === player_id) {
+        icons.push(booking.card_type === "yellow" ? yellowCardIcon : redCardIcon);
+      }
+    });
+
+    return icons;
+  };
+
   const renderTeamRoster = (teamRoster, teamName, teamId) => (
     <div className="team-roster">
       <h4>{teamName}</h4>
@@ -36,6 +61,9 @@ const TeamRosters = ({ match }) => {
         {teamRoster.map((roster) => (
           <li key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}>
             #{roster.jersey_number} {roster.player.first_name} <strong>{roster.player.last_name}</strong> - {roster.position}
+            {getPlayerIcons(roster.player_id).map((icon, index) => (
+              <img key={index} src={icon} alt="icon" style={{ width: "15px", marginLeft: "5px" }} />
+            ))}
           </li>
         ))}
         {match.match_managers
@@ -93,6 +121,20 @@ TeamRosters.propTypes = {
         }).isRequired,
       })
     ).isRequired,
+    match_report: PropTypes.shape({
+      goals: PropTypes.arrayOf(
+        PropTypes.shape({
+          player_id: PropTypes.number.isRequired,
+          assist_player_id: PropTypes.number,
+        })
+      ),
+      bookings: PropTypes.arrayOf(
+        PropTypes.shape({
+          player_id: PropTypes.number.isRequired,
+          card_type: PropTypes.string.isRequired,
+        })
+      ),
+    }).isRequired,
   }).isRequired,
 };
 
