@@ -1,0 +1,235 @@
+/* Match Details */
+
+.competition {
+  font-size: 1.5em;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+  color: #2980b9; /* Blue color */
+}
+
+.competition a {
+  color: inherit;
+}
+
+.match-title {
+  font-size: 1.8em;
+  margin-bottom: 12px;
+  text-align: center;
+  color: #2c3e50; /* Dark blue color */
+}
+
+.match-title a {
+  color: inherit;
+}
+
+.date {
+  font-size: 1.2em;
+  text-align: center;
+  color: #555;
+  margin: 0;
+}
+
+.venue {
+  font-size: 1.2em;
+  text-align: center;
+  color: #2c3e50;
+}
+
+/* Match Facts */
+
+.result-title,
+.facts-title,
+.notes-title {
+  font-size: 1.5em;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.result-title {
+  text-align: center;
+}
+
+.result {
+  font-size: 1.2em;
+  color: #34495e;
+  text-align: center;
+}
+
+.facts-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fact-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  color: #2c3e50;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.fact-icon {
+  width: 25px;
+  margin-right: 10px;
+}
+
+.minute {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #e67e22; /* Orange color */
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+}
+
+.fact-team-name {
+  font-weight: bold;
+  color: #2980b9; /* Blue color */
+}
+
+.fact-player-name {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.assist {
+  font-style: italic;
+  color: #555; /* Gray color */
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+
+/* Match Rosters */
+.rosters-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.team-roster {
+  flex: 1 1 100%;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-right: 0;
+}
+
+/* Match Officials */
+.match-officials {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.officials-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.official-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
+
+.official-name {
+  font-weight: bold;
+  color: #2c3e50; /* Dark blue color */
+}
+
+.official-role {
+  margin-left: 10px;
+  font-style: italic;
+  color: #555; /* Gray color */
+}
+
+.notes {
+  margin-top: 10px;
+  font-size: 1em;
+  color: #2c3e50; /* Dark blue color */
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .team-roster {
+    flex: 1 1 45%;
+    margin-right: 10px;
+  }
+
+  .team-roster:last-child {
+    margin-right: 0;
+  }
+}
+
+.team-name {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  color: #2980b9; /* Blue color */
+}
+
+.roster-section-title {
+  font-size: 1.2em;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  color: #2c3e50; /* Dark blue color */
+}
+
+.roster-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.roster-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
+
+.jersey-number {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #e67e22; /* Orange color */
+}
+
+.player-name {
+  flex-grow: 1;
+  color: #2c3e50; /* Dark blue color */
+}
+
+.player-position {
+  margin-left: 10px;
+  font-style: italic;
+  color: #555; /* Gray color */
+}
+
+.event-icon {
+  width: 15px;
+  margin-left: 5px;
+}
+
+.manager-item {
+  font-weight: bold;
+  margin-top: 10px;
+  color: #2c3e50; /* Dark blue color */
+  list-style: none;
+}

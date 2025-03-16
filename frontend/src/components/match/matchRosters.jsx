@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import goalIcon from "../../assets/icons/goal-icon.webp"; // Adjust the path as needed
 import yellowCardIcon from "../../assets/icons/yellow-card-icon.webp"; // Adjust the path as needed
 import redCardIcon from "../../assets/icons/red-card-icon.webp"; // Adjust the path as needed
@@ -36,30 +36,38 @@ const TeamRosters = ({ match }) => {
   );
 
   const getPlayerIcons = (player_id, is_starter) => {
-    const icons = [];
+    const events = [];
 
     match.match_report.goals.forEach((goal) => {
       if (goal.player_id === player_id) {
-        icons.push(goalIcon);
+        events.push({ time: goal.goal_minute, icon: goalIcon });
       }
       if (goal.assist_player_id === player_id) {
-        icons.push(assistIcon);
+        events.push({ time: goal.goal_minute, icon: assistIcon });
       }
     });
 
     match.match_report.bookings.forEach((booking) => {
       if (booking.player_id === player_id) {
-        icons.push(booking.card_type === "yellow" ? yellowCardIcon : redCardIcon);
+        events.push({
+          time: booking.booking_minute,
+          icon: booking.card_type === "yellow" ? yellowCardIcon : redCardIcon,
+        });
       }
     });
 
     match.match_rosters.forEach((roster) => {
       if (roster.player_id === player_id && roster.substitution_time !== null) {
-        icons.push(is_starter ? subOffIcon : subOnIcon);
+        events.push({
+          time: roster.substitution_time,
+          icon: is_starter ? subOffIcon : subOnIcon,
+        });
       }
     });
 
-    return icons;
+    events.sort((a, b) => a.time - b.time);
+
+    return events.map((event) => event.icon);
   };
 
   const renderTeamRoster = (teamRoster, teamName, teamId) => {
@@ -68,33 +76,59 @@ const TeamRosters = ({ match }) => {
 
     return (
       <div className="team-roster">
-        <h4>{teamName}</h4>
-        <h5>Starters</h5>
-        <ul>
+        <h4 className="team-name">{teamName}</h4>
+        <h5 className="roster-section-title">Starters</h5>
+        <ul className="roster-list">
           {starters.map((roster) => (
-            <li key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}>
-              #{roster.jersey_number} {roster.player.first_name} <strong>{roster.player.last_name}</strong> - {roster.position}
-              {getPlayerIcons(roster.player_id, true).map((icon, index) => (
-                <img key={index} src={icon} alt="icon" style={{ width: "15px", marginLeft: "5px" }} />
-              ))}
+            <li
+              key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}
+              className="roster-item"
+            >
+              <span className="jersey-number">#{roster.jersey_number}</span>
+              <span className="player-name">
+                {roster.player.first_name}{" "}
+                <strong>{roster.player.last_name}</strong>
+                {getPlayerIcons(roster.player_id, true).map((icon, index) => (
+                  <img
+                    key={index}
+                    src={icon}
+                    alt="icon"
+                    className="event-icon"
+                  />
+                ))}
+              </span>
+              <span className="player-position">{roster.position}</span>
             </li>
           ))}
         </ul>
-        <h5>Substitutes</h5>
-        <ul>
+        <h5 className="roster-section-title">Substitutes</h5>
+        <ul className="roster-list">
           {substitutes.map((roster) => (
-            <li key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}>
-              #{roster.jersey_number} {roster.player.first_name} <strong>{roster.player.last_name}</strong> - {roster.position}
-              {getPlayerIcons(roster.player_id, false).map((icon, index) => (
-                <img key={index} src={icon} alt="icon" style={{ width: "15px", marginLeft: "5px" }} />
-              ))}
+            <li
+              key={`${roster.match_id}-${roster.team_id}-${roster.player_id}`}
+              className="roster-item"
+            >
+              <span className="jersey-number">#{roster.jersey_number}</span>
+              <span className="player-name">
+                {roster.player.first_name}{" "}
+                <strong>{roster.player.last_name}</strong>
+                {getPlayerIcons(roster.player_id, false).map((icon, index) => (
+                  <img
+                    key={index}
+                    src={icon}
+                    alt="icon"
+                    className="event-icon"
+                  />
+                ))}
+              </span>
+              <span className="player-position">{roster.position}</span>
             </li>
           ))}
         </ul>
         {match.match_managers
           .filter((manager) => manager.team_id === teamId)
           .map((manager) => (
-            <li key={manager.match_manager_id}>
+            <li key={manager.match_manager_id} className="manager-item">
               Manager: {manager.manager.first_name} {manager.manager.last_name}
             </li>
           ))}
@@ -105,9 +139,17 @@ const TeamRosters = ({ match }) => {
   return (
     <div className="component-container">
       <h3>Team Lineups</h3>
-      <div className="rosters">
-        {renderTeamRoster(homeTeamRoster, match.home_team.name, match.home_team.team_id)}
-        {renderTeamRoster(awayTeamRoster, match.away_team.name, match.away_team.team_id)}
+      <div className="rosters-container">
+        {renderTeamRoster(
+          homeTeamRoster,
+          match.home_team.name,
+          match.home_team.team_id
+        )}
+        {renderTeamRoster(
+          awayTeamRoster,
+          match.away_team.name,
+          match.away_team.team_id
+        )}
       </div>
     </div>
   );
@@ -127,7 +169,7 @@ TeamRosters.propTypes = {
         }).isRequired,
         position: PropTypes.string.isRequired,
         is_starter: PropTypes.bool.isRequired,
-        substitution_time: PropTypes.string,
+        substitution_time: PropTypes.number,
       })
     ).isRequired,
     home_team: PropTypes.shape({
@@ -153,12 +195,14 @@ TeamRosters.propTypes = {
         PropTypes.shape({
           player_id: PropTypes.number.isRequired,
           assist_player_id: PropTypes.number,
+          goal_minute: PropTypes.number.isRequired,
         })
       ),
       bookings: PropTypes.arrayOf(
         PropTypes.shape({
           player_id: PropTypes.number.isRequired,
           card_type: PropTypes.string.isRequired,
+          booking_minute: PropTypes.number.isRequired,
         })
       ),
     }).isRequired,

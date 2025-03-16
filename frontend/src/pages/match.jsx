@@ -25,7 +25,7 @@ function MatchPage() {
   if (!match) {
     return <div>Loading...</div>;
   }
-
+  console.log(match);
   return (
     <div>
       <Header />
@@ -34,7 +34,7 @@ function MatchPage() {
         <MatchDetails match={match} />
         <MatchReport match={match} />
         <TeamRosters match={match} />
-        <MatchOfficials officials={match.match_officials} />
+        <MatchOfficials officials={match.match_officials} reportNotes={match.match_report.notes} />
       </div>
       <Footer />
     </div>

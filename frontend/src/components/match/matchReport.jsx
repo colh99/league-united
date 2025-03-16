@@ -31,9 +31,9 @@ const MatchReport = ({ match }) => {
       minuteText: `${goal.goal_minute}'`,
       playerName: getPlayerName(goal.player_id),
       teamName: getTeamName(goal.team_id),
-      assistText: goal.assist_player_id
-        ? ` (assisted by ${getPlayerName(goal.assist_player_id)})`
-        : "",
+      assistPlayer: goal.assist_player_id
+        ? `${getPlayerName(goal.assist_player_id)}`
+        : null,
     })) || []),
     ...(match.match_report?.bookings.map((booking) => ({
       type: "booking",
@@ -83,64 +83,51 @@ const MatchReport = ({ match }) => {
     <div className="component-container">
       {match.match_report && (
         <>
-          <h3>Result</h3>
-          <p>
-            {match.home_team.name} {match.match_report.home_team_score} -{" "}
-            {match.match_report.away_team_score} {match.away_team.name}
+          <h3 className="result-title">Result</h3>
+          <p className="result">
+            {match.home_team.name} <strong>{match.match_report.home_team_score} -{" "}
+            {match.match_report.away_team_score}</strong> {match.away_team.name}
           </p>
-          <h3>Match Facts</h3>
-          <ul>
+          <h3 className="facts-title">Match Facts</h3>
+          <ul className="facts-list">
             {matchFacts.map((fact, index) => (
-              <li key={index}>
+              <li key={index} className="fact-item">
                 <img
                   src={fact.icon}
                   alt={fact.type}
-                  style={{ width: "15px", marginRight: "10px" }}
+                  className="fact-icon"
                 />
                 <span className="minute">{fact.minuteText} </span>
                 <span className="description">
                   {fact.type === "goal" ? (
                     <>
-                      <strong>Goal!</strong> -{" "}
-                      <span className="fact-team-name">{fact.teamName}</span> -
-                      Scored by{" "}
-                      <span className="fact-player-name">
-                        {fact.playerName}
-                      </span>
-                      {fact.assistText && (
-                        <span className="assist">{fact.assistText}</span>
-                      )}
+                      <strong>Goal!</strong>
+                      <span className="fact-team-name">{fact.teamName}</span>
+                      <span className="nowrap">Scored by <span className="fact-player-name">{fact.playerName}</span></span>
+                      {fact.assistPlayer && <> <span className="assist">Assisted by <span className="fact-player-name">{fact.assistPlayer}</span></span></>}
                     </>
                   ) : fact.type === "booking" ? (
                     <>
-                      <strong>{fact.cardType} Card</strong> -{" "}
+                      <strong>{fact.cardType} Card</strong>
+                      <span className="fact-team-name">{fact.teamName}</span>
                       <span className="fact-player-name">
                         {fact.playerName}
-                      </span>{" "}
-                      (<span className="fact-team-name">{fact.teamName}</span>)
+                      </span>
                     </>
                   ) : (
                     <>
-                      <strong>Substitution</strong> -{" "}
-                      <span className="fact-team-name">{fact.teamName}</span>:
+                      <strong>Substitution</strong>
+                      <span className="fact-team-name">{fact.teamName}</span>
                       <br />
-                      <strong>On:</strong>{" "}
-                      <span className="fact-player-name">
-                        {fact.playersOn.join(", ")}
-                      </span>
+                      <span className="nowrap">On: <span className="fact-player-name">{fact.playersOn.join(", ")}</span></span>
                       <br />
-                      <strong>Off:</strong>{" "}
-                      <span className="fact-player-name">
-                        {fact.playersOff.join(", ")}
-                      </span>
+                      <span className="nowrap">Off: <span className="fact-player-name">{fact.playersOff.join(", ")}</span></span>
                     </>
                   )}
                 </span>
               </li>
             ))}
           </ul>
-          <h3>Official&apos;s Notes</h3>
-          <p>{match.match_report.notes}</p>
         </>
       )}
     </div>
