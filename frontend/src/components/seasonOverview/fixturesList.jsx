@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
-const FixturesList = ({ matches, reports, getTeamNameById }) => {
+const FixturesList = ({ matches, reports }) => {
   return (
     <div className="component-container">
       <h3>Fixtures and Results</h3>
@@ -11,6 +11,9 @@ const FixturesList = ({ matches, reports, getTeamNameById }) => {
             (report) => report.match_id === match.match_id
           );
           const matchDate = new Date(match.match_date);
+          const homeTeamName = match.home_team ? match.home_team.name : "Unknown";
+          const awayTeamName = match.away_team ? match.away_team.name : "Unknown";
+
           return (
             <Link to={`/matches/${match.match_id}`} key={match.match_id}>
               <li key={match.match_id} className="fixture">
@@ -22,9 +25,7 @@ const FixturesList = ({ matches, reports, getTeamNameById }) => {
                   })}
                 </p>
                 <div className="teams">
-                  <p className="home-team">
-                    {getTeamNameById(match.home_team_id)}
-                  </p>
+                  <p className="home-team">{homeTeamName}</p>
                   {report ? (
                     <p className="score">
                       {report.home_team_score} - {report.away_team_score}
@@ -32,9 +33,7 @@ const FixturesList = ({ matches, reports, getTeamNameById }) => {
                   ) : (
                     <p className="score">vs</p>
                   )}
-                  <p className="away-team">
-                    {getTeamNameById(match.away_team_id)}
-                  </p>
+                  <p className="away-team">{awayTeamName}</p>
                 </div>
               </li>
             </Link>
@@ -50,8 +49,12 @@ FixturesList.propTypes = {
     PropTypes.shape({
       match_id: PropTypes.number.isRequired,
       match_date: PropTypes.string.isRequired,
-      home_team_id: PropTypes.number.isRequired,
-      away_team_id: PropTypes.number.isRequired,
+      home_team: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+      away_team: PropTypes.shape({
+        name: PropTypes.string,
+      }),
     })
   ).isRequired,
   reports: PropTypes.arrayOf(
@@ -61,7 +64,6 @@ FixturesList.propTypes = {
       away_team_score: PropTypes.number.isRequired,
     })
   ).isRequired,
-  getTeamNameById: PropTypes.func.isRequired,
 };
 
 export default FixturesList;

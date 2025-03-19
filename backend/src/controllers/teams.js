@@ -53,17 +53,33 @@ const getTeamById = async (req, res) => {
     return res.status(400).json({ error: upcomingError.message });
   }
 
-  // Fetch up to 3 previous matches with opposing team names and venue names
+    // Fetch up to 3 previous matches with opposing team names, venue names, and match reports
   const { data: previousMatchesData, error: previousError } = await supabase
     .from("matches")
-    .select("*, home_team:home_team_id(name), away_team:away_team_id(name), venue:venue_id(name)") // Include team and venue names
+    .select(`
+      *,
+      home_team:home_team_id(name),
+      away_team:away_team_id(name),
+      venue:venue_id(name)
+    `) // Include team names, venue names, and match reports
     .or(`home_team_id.eq.${team_id},away_team_id.eq.${team_id}`)
     .lt("match_date", now) // Get matches in the past
     .order("match_date", { ascending: false }) // Most recent previous matches first
     .limit(3);
-
+  
   if (previousError) {
     return res.status(400).json({ error: previousError.message });
+  }
+
+  // Fetch the reports for the previous matches
+  const matchIds = previousMatchesData.map((match) => match.match_id);
+  const { data: reportsData, error: reportsError } = await supabase
+    .from("match_reports")
+    .select("*")
+    .in("match_id", matchIds);
+
+  if (reportsError) {
+    return res.status(400).json({ error: reportsError.message });
   }
 
   const { data: venueData, error: venueError } = await supabase
@@ -91,6 +107,7 @@ const getTeamById = async (req, res) => {
     team: teamData,
     roster: rosterData,
     previousMatches: previousMatchesData,
+    match_reports: reportsData,
     upcomingMatches: upcomingMatchesData,
     primaryVenue: venueData,
     manager: managerData,

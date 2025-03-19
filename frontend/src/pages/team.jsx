@@ -30,7 +30,7 @@ function TeamPage() {
       <Header />
         <div className="container">
               <TeamDetails team={team.team} manager={team.manager} venue={team.primaryVenue} />
-              <PreviousMatches matches={team.previousMatches} teamId={team_id} />
+              <PreviousMatches matches={team.previousMatches} teamId={team_id} reports={team.match_reports} />
               <Roster roster={team.roster} />
             </div>
       <Footer />

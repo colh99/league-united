@@ -68,7 +68,11 @@ const getSeasonOverview = async (req, res) => {
     // Matches in the season
     const { data: matchesData, error: matchesError } = await supabase
       .from("matches")
-      .select("*")
+      .select(`
+        *,
+        home_team:home_team_id(name),
+        away_team:away_team_id(name)
+      `)
       .eq("season_id", req.params.id);
     if (matchesError) {
       throw matchesError;

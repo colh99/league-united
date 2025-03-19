@@ -200,9 +200,7 @@
 .roster-item {
   display: flex;
   align-items: center;
-  margin-bottom: 5px;
   padding: 5px;
-  border-bottom: 1px solid #ddd;
 }
 
 .jersey-number {
