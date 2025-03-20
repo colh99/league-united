@@ -14,6 +14,14 @@
     border-bottom: 1px solid #dadada;
   }
 
+  .fixtures-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+  }
+
   a .fixture:hover {
     text-decoration: none;
     background-color: #f4f4f4;

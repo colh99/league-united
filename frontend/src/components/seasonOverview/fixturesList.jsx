@@ -1,10 +1,13 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
-const FixturesList = ({ matches, reports }) => {
+const FixturesList = ({ matches, reports, seasonId }) => {
   return (
     <div className="component-container">
-      <h3>Fixtures and Results</h3>
+      <Link to={`/fixtures/season/${seasonId}`} className="fixtures-header">
+        <h3>Fixtures and Results</h3>
+        <p>View season schedule</p>
+      </Link>
       <ul className="fixtures-list">
         {matches.map((match) => {
           const report = reports.find(
@@ -64,6 +67,7 @@ FixturesList.propTypes = {
       away_team_score: PropTypes.number.isRequired,
     })
   ).isRequired,
+  seasonId: PropTypes.string,
 };
 
 export default FixturesList;

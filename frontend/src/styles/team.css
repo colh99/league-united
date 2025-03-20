@@ -36,11 +36,12 @@
 
 /* Matches */
 
-.matches-title {
-  font-size: 1.5rem;
-  color: #2c3e50; /* Dark blue color */
-  margin-bottom: 20px;
-  text-align: center;
+.matches-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
 }
 
 .matches-list {
@@ -137,13 +138,6 @@ a .match:hover {
 }
 
 /* Roster */
-
-.roster-title {
-  font-size: 1.5rem;
-  color: #2c3e50; /* Dark blue color */
-  margin-bottom: 20px;
-  text-align: center;
-}
 
 .roster-list {
   list-style-type: none;

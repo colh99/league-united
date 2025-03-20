@@ -146,6 +146,7 @@ const SeasonOverview = ({ seasons, selectedSeason, onSeasonChange }) => {
         <h2>{season.season.headline_year} Season Overview</h2>
         <LeagueTable leagueTable={leagueTable} />
         <FixturesList
+          seasonId={season.season.season_id}
           matches={season.matches}
           reports={season.reports}
           getTeamNameById={getTeamNameById}

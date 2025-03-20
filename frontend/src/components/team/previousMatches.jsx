@@ -4,7 +4,10 @@ import { Link } from "react-router-dom";
 const PreviousMatches = ({ matches, reports, teamId }) => {
   return (
     <div className="component-container">
-      <h3 className="matches-title">Previous Results</h3>
+      <Link to={`/fixtures/team/${teamId}`} className="matches-header">
+        <h3 className="matches-title">Previous Results</h3>
+        <p>View team schedule</p>
+      </Link>
       <ul className="matches-list">
         {matches.map((match, index) => {
           const matchDate = new Date(match.match_date); // Parse match_date as Date object

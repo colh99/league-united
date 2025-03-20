@@ -165,10 +165,7 @@ const getMatchesByTeam = async (req, res) => {
         )
       `
     )
-    .or(
-      `home_team_id.eq.${req.params.teamId}`,
-      `away_team_id.eq.${req.params.teamId}`
-    );
+    .or(`home_team_id.eq.${req.params.teamId},away_team_id.eq.${req.params.teamId}`);
 
   if (error) return res.status(400).json({ error: error.message });
   if (!matches.length)
