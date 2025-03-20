@@ -6,6 +6,7 @@ import "../../styles/calendar.css"; // Add CSS for styling the calendar
 function FixturesList({ seasonId, teamId }) {
   const [fixtures, setFixtures] = useState([]);
   const [error, setError] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
     const getFixtures = async () => {
@@ -17,6 +18,14 @@ function FixturesList({ seasonId, teamId }) {
           data = await getMatchesBySeason(seasonId);
         }
         setFixtures(data);
+
+        // Find the last month with fixtures
+        if (data.length > 0) {
+          const lastFixtureDate = new Date(
+            Math.max(...data.map(fixture => new Date(fixture.match_date)))
+          );
+          setCurrentDate(new Date(lastFixtureDate.getFullYear(), lastFixtureDate.getMonth(), 1));
+        }
       } catch (err) {
         setError(err.message);
       }
@@ -25,12 +34,19 @@ function FixturesList({ seasonId, teamId }) {
     getFixtures();
   }, [seasonId, teamId]);
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  const handlePreviousMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    );
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    );
+  };
 
   const renderCalendar = () => {
-    const currentDate = new Date();
     const daysInMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth() + 1,
@@ -50,9 +66,14 @@ function FixturesList({ seasonId, teamId }) {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dayFixtures = fixtures.filter(
-        (fixture) => new Date(fixture.match_date).getDate() === day
-      );
+      const dayFixtures = fixtures.filter((fixture) => {
+        const fixtureDate = new Date(fixture.match_date);
+        return (
+          fixtureDate.getFullYear() === currentDate.getFullYear() &&
+          fixtureDate.getMonth() === currentDate.getMonth() &&
+          fixtureDate.getDate() === day
+        );
+      });
       calendarDays.push(
         <div key={day} className="calendar-day">
           <div className="date">{day}</div>
@@ -68,9 +89,21 @@ function FixturesList({ seasonId, teamId }) {
     return calendarDays;
   };
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div className="calendar">
       <div className="calendar-header">
+        <button onClick={handlePreviousMonth}>Previous</button>
+        <div>
+          {currentDate.toLocaleString("default", { month: "long" })}{" "}
+          {currentDate.getFullYear()}
+        </div>
+        <button onClick={handleNextMonth}>Next</button>
+      </div>
+      <div className="calendar-weekdays">
         <div>Sun</div>
         <div>Mon</div>
         <div>Tue</div>
@@ -79,7 +112,9 @@ function FixturesList({ seasonId, teamId }) {
         <div>Fri</div>
         <div>Sat</div>
       </div>
-      <div className="calendar-body">{renderCalendar()}</div>
+      <div className="calendar-body">
+        {renderCalendar()}
+      </div>
     </div>
   );
 }
