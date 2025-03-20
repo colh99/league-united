@@ -6,7 +6,10 @@ function TeamsPage() {
   return (
     <div>
       <Header />
+      <div className="container">
+        <h1>Teams</h1>
         <TeamList />
+      </div>
       <Footer />
     </div>
   );

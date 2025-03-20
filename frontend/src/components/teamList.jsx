@@ -16,8 +16,7 @@ const TeamList = () => {
   }, []);
 
   return (
-    <div className="container">
-      <h1>All Teams</h1>
+    <div className="component-container">
       <div>
         {teams.map((entry, index) => (
           <div key={index}>
