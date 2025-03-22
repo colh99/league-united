@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import "../styles/index.css";
 
@@ -12,6 +12,7 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -38,6 +39,7 @@ const Header = () => {
     await supabase.auth.signOut();
     setUser(null);
     localStorage.removeItem("user");
+    navigate("/");
   };
 
   const toggleMenu = () => {

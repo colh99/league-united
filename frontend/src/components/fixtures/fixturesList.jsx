@@ -174,7 +174,7 @@ function FixturesList({ seasonId, teamId }) {
   return (
     <div>
       <div className="component-container">
-        <button onClick={() => setIsCalendarView(!isCalendarView)}>
+        <button onClick={() => setIsCalendarView(!isCalendarView)} className="calendar-toggle">
           {isCalendarView ? "Switch to List View" : "Switch to Calendar View"}
         </button>
         {isCalendarView ? (
