@@ -22,7 +22,7 @@
     background-color: #f4f4f4;
     color: #333;
     font-weight: 600;
-    text-align: left;
+    text-align: center;
     padding: 1rem;
 }
 
@@ -49,6 +49,7 @@
     display: flex;
     align-items: left;
     text-align: left;
+    text-wrap: nowrap;
 }
 
 .league-table .team-cell a {
@@ -72,17 +73,6 @@
     background-color: #4cecca;
 }
 
-.league-table th.position::after { content: "Position"; }
-.league-table th.team::after { content: "Team"; }
-.league-table th.games-played::after { content: "Games Played"; }
-.league-table th.points::after { content: "Points"; }
-.league-table th.goal-difference::after { content: "Goal Difference"; }
-.league-table th.goals-for::after { content: "Goals For"; }
-.league-table th.goals-against::after { content: "Goals Against"; }
-.league-table th.wins::after { content: "Wins"; }
-.league-table th.draws::after { content: "Draws"; }
-.league-table th.losses::after { content: "Losses"; }
-
 /* Responsive styles */
 @media (max-width: 768px) {
     .league-table th,
@@ -105,17 +95,6 @@
         margin-right: 0.1rem;
         margin-bottom: 0.5rem;
     }
-
-    .league-table th.position::after { content: "Pos"; }
-    .league-table th.team::after { content: "Team"; }
-    .league-table th.games-played::after { content: "GP"; }
-    .league-table th.points::after { content: "Pts"; }
-    .league-table th.goal-difference::after { content: "GD"; }
-    .league-table th.goals-for::after { content: "GF"; }
-    .league-table th.goals-against::after { content: "GA"; }
-    .league-table th.wins::after { content: "W"; }
-    .league-table th.draws::after { content: "D"; }
-    .league-table th.losses::after { content: "L"; }
 }
 
 @media (max-width: 480px) {
@@ -139,15 +118,4 @@
         margin-right: 0;
         margin-bottom: 0.25rem;
     }
-
-    .league-table th.position::after { content: "P"; }
-    .league-table th.team::after { content: "Team"; }
-    .league-table th.games-played::after { content: "GP"; }
-    .league-table th.points::after { content: "Pts"; }
-    .league-table th.goal-difference::after { content: "GD"; }
-    .league-table th.goals-for::after { content: "GF"; }
-    .league-table th.goals-against::after { content: "GA"; }
-    .league-table th.wins::after { content: "W"; }
-    .league-table th.draws::after { content: "D"; }
-    .league-table th.losses::after { content: "L"; }
 }

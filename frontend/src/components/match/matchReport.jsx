@@ -81,7 +81,7 @@ const MatchReport = ({ match }) => {
 
   return (
     <div className="component-container">
-      {match.match_report && (
+      {match.match_report ? (
         <>
           <h3 className="result-title">Result</h3>
           <p className="result">
@@ -129,6 +129,8 @@ const MatchReport = ({ match }) => {
             ))}
           </ul>
         </>
+      ) : (
+        <p>No report available</p>
       )}
     </div>
   );

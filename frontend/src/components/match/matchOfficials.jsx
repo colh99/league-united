@@ -1,21 +1,23 @@
 import PropTypes from 'prop-types';
 
-const MatchOfficials = ({ officials, reportNotes }) => {
+const MatchOfficials = ({ officials }) => {
   return (
     <div className="component-container match-officials">
       <h3 className="section-title">Officials</h3>
-      <ul className="officials-list">
-        {officials.map((official) => (
-          <li key={official.match_official_id} className="official-item">
-            <span className="official-name">
-              {official.official.first_name} {official.official.last_name}
-            </span>
-            <span className="official-role">{official.role}</span>
-          </li>
-        ))}
-      </ul>
-      <h3 className="section-title">Official&apos;s Notes</h3>
-      <p className="notes">{reportNotes}</p>
+      {officials.length === 0 ? (
+        <p>No officials assigned</p>
+      ) : (
+        <ul className="officials-list">
+          {officials.map((official) => (
+            <li key={official.match_official_id} className="official-item">
+              <span className="official-name">
+                {official.official.first_name} {official.official.last_name}
+              </span>
+              <span className="official-role">{official.role}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -31,7 +33,6 @@ MatchOfficials.propTypes = {
       role: PropTypes.string.isRequired,
     })
   ).isRequired,
-  reportNotes: PropTypes.string,
 };
 
 export default MatchOfficials;

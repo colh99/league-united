@@ -9,16 +9,16 @@ const LeagueTable = ({ leagueTable }) => {
         <table className="league-table">
           <thead>
             <tr>
-              <th className="position"></th>
-              <th className="team"></th>
-              <th className="points"></th>
-              <th className="games-played"></th>
-              <th className="wins"></th>
-              <th className="draws"></th>
-              <th className="losses"></th>
-              <th className="goal-difference"></th>
-              <th className="goals-for"></th>
-              <th className="goals-against"></th>
+              <th className="position">Pos</th>
+              <th className="team">Team</th>
+              <th className="points">Pts</th>
+              <th className="games-played">GP</th>
+              <th className="wins">W</th>
+              <th className="draws">D</th>
+              <th className="losses">L</th>
+              <th className="goal-difference">GD</th>
+              <th className="goals-for">GF</th>
+              <th className="goals-against">GA</th>
             </tr>
           </thead>
           <tbody>

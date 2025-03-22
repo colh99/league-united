@@ -36,67 +36,73 @@ const SeasonOverview = ({ seasons, selectedSeason, onSeasonChange }) => {
           match.home_team_id === team.teams.team_id ||
           match.away_team_id === team.teams.team_id
       );
-
+  
       const teamWins = teamMatches.filter((match) => {
         const report = season.reports.find(
           (report) => report.match_id === match.match_id
         );
         return (
-          (match.home_team_id === team.teams.team_id &&
+          report &&
+          ((match.home_team_id === team.teams.team_id &&
             report.home_team_score > report.away_team_score) ||
           (match.away_team_id === team.teams.team_id &&
-            report.away_team_score > report.home_team_score)
+            report.away_team_score > report.home_team_score))
         );
       });
-
+  
       const teamDraws = teamMatches.filter((match) => {
         const report = season.reports.find(
           (report) => report.match_id === match.match_id
         );
-        return report.home_team_score === report.away_team_score;
+        return report && report.home_team_score === report.away_team_score;
       });
-
+  
       const teamLosses = teamMatches.filter((match) => {
         const report = season.reports.find(
           (report) => report.match_id === match.match_id
         );
         return (
-          (match.home_team_id === team.teams.team_id &&
+          report &&
+          ((match.home_team_id === team.teams.team_id &&
             report.home_team_score < report.away_team_score) ||
           (match.away_team_id === team.teams.team_id &&
-            report.away_team_score < report.home_team_score)
+            report.away_team_score < report.home_team_score))
         );
       });
-
+  
       const goalsFor = teamMatches.reduce((total, match) => {
         const report = season.reports.find(
           (report) => report.match_id === match.match_id
         );
         return (
           total +
-          (match.home_team_id === team.teams.team_id
-            ? report.home_team_score
-            : report.away_team_score)
+          (report
+            ? (match.home_team_id === team.teams.team_id
+              ? report.home_team_score
+              : report.away_team_score)
+            : 0)
         );
       }, 0);
-
+  
       const goalsAgainst = teamMatches.reduce((total, match) => {
         const report = season.reports.find(
           (report) => report.match_id === match.match_id
         );
         return (
           total +
-          (match.home_team_id === team.teams.team_id
-            ? report.away_team_score
-            : report.home_team_score)
+          (report
+            ? (match.home_team_id === team.teams.team_id
+              ? report.away_team_score
+              : report.home_team_score)
+            : 0)
         );
       }, 0);
-
+  
       const gamesPlayed = teamWins.length + teamDraws.length + teamLosses.length;
       const goalDifference = goalsFor - goalsAgainst;
       const teamPoints = teamWins.length * 3 + teamDraws.length;
       const logo = team.teams.logo_url;
-
+  
       return {
         team_id: team.teams.team_id,
         logo: logo,
@@ -111,7 +117,7 @@ const SeasonOverview = ({ seasons, selectedSeason, onSeasonChange }) => {
         points: teamPoints,
       };
     });
-
+  
     // Sort by points, then goal difference, then goals for, then wins
     leagueTable.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
@@ -120,7 +126,7 @@ const SeasonOverview = ({ seasons, selectedSeason, onSeasonChange }) => {
       if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
       return b.wins - a.wins;
     });
-
+  
     return leagueTable;
   };
 

@@ -276,7 +276,7 @@ a {
 }
 
 a:hover {
-  color: #e74c3c; /* Red color on hover */
+  color: #e74c3c !important; /* Red color on hover */
   text-decoration: underline;
 }
 

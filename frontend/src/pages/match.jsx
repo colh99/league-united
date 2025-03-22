@@ -32,9 +32,9 @@ function MatchPage() {
       <div className="container">
         <h1>Match Hub</h1>
         <MatchDetails match={match} />
-        <MatchReport match={match} />
-        <TeamRosters match={match} />
-        <MatchOfficials officials={match.match_officials} reportNotes={match.match_report.notes} />
+        {match.match_report && <MatchReport match={match} />}
+        {match.match_report && <TeamRosters match={match} />}
+        <MatchOfficials officials={match.match_officials} />
       </div>
       <Footer />
     </div>
