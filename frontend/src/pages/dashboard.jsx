@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
+import UserLeagues from "../components/dashboard/userLeagues";
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -12,27 +13,46 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
       if (!user) {
-        navigate('/login'); // Redirect to login if user is not logged in
+        navigate("/login"); // Redirect to login if user is not logged in
       }
     };
 
     fetchUser();
   }, [navigate]);
 
+  useEffect(() => {
+    if (location.state && location.state.message) {
+      setMessage(location.state.message);
+      // Clear the message after displaying it
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
+
   return (
     <div>
       <Header />
       <div className="container">
         <h1>Dashboard</h1>
+        {message && <div className="alert alert-success">{message}</div>}
         {user ? (
-          <div>
-            <p>Welcome, <strong>{user.user_metadata.display_name}!</strong></p>
+          <div className="component-container">
+            <p>
+              Welcome, <strong>{user.user_metadata.display_name}!</strong>
+            </p>
+            <UserLeagues user={user} />
           </div>
         ) : (
           <p>Loading user information...</p>

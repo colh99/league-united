@@ -303,6 +303,8 @@ textarea {
   margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-family: "Arial", sans-serif;
+  font-size: 1rem;
 }
 
 input:focus,
