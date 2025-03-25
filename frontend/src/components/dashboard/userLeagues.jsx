@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getUserLeagues, deleteLeague } from "../../api/userData"; // Import the API calls
 
-const UserLeagues = ({ user }) => {
+const UserLeagues = ({ user, setMessage }) => {
   const [leagues, setLeagues] = useState([]);
 
   useEffect(() => {
@@ -32,25 +32,47 @@ const UserLeagues = ({ user }) => {
     try {
       await deleteLeague(id);
       setLeagues(leagues.filter((league) => league.league_id !== id));
+      setMessage("League deleted successfully."); // Set the message
+      // Clear the message after 7 seconds
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 7000);
+      return () => clearTimeout(timer);
     } catch (error) {
       console.error("Error deleting league:", error);
+      setMessage("Error deleting league."); // Set the error message
+      // Clear the message after 7 seconds
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 7000);
+      return () => clearTimeout(timer);
     }
   };
 
   return (
-    <div className="component-container">
+    <div className="sub-component-container">
       <h2>Your Leagues</h2>
       {leagues && leagues.length > 0 ? (
-        <ul>
+        <ul className="dashboard-entity-list">
           {leagues.map((league) => (
             <li key={league.league_id}>
-              {league.name}
-              <Link to={`/form/league/${league.league_id}`}>
-                <button>Edit</button>
+              <Link to={`/leagues/${league.league_id}`}>
+                <div className="entity-info">
+                  <h3>{league.name} </h3>
+                  <img src={league.logo_url} alt={league.name} />
+                </div>
               </Link>
-              <button onClick={() => handleDelete(league.league_id)}>
-                Delete
-              </button>
+              <div className="button-container">
+                <Link to={`/form/league/${league.league_id}`}>
+                  <button className="edit-button">Edit</button>
+                </Link>
+                <button
+                  className="delete-button"
+                  onClick={() => handleDelete(league.league_id)}
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -71,6 +93,7 @@ UserLeagues.propTypes = {
       display_name: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
+  setMessage: PropTypes.func.isRequired, // Add setMessage prop type
 };
 
 export default UserLeagues;

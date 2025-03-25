@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const FixturesList = ({ matches, reports, seasonId }) => {
   return (
-    <div className="component-container">
+    <div className="sub-component-container">
       <Link to={`/fixtures/season/${seasonId}`} className="fixtures-header">
         <h3>Fixtures and Results</h3>
         <p>View season schedule</p>

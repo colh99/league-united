@@ -3,7 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
+import "../styles/dashboard.css";
 import UserLeagues from "../components/dashboard/userLeagues";
+import Message from "../components/dashboard/message";
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -36,7 +38,7 @@ const Dashboard = () => {
       // Clear the message after displaying it
       const timer = setTimeout(() => {
         setMessage(null);
-      }, 5000);
+      }, 7000);
       return () => clearTimeout(timer);
     }
   }, [location.state]);
@@ -44,20 +46,18 @@ const Dashboard = () => {
   return (
     <div>
       <Header />
-      <div className="container">
-        <h1>Dashboard</h1>
-        {message && <div className="alert alert-success">{message}</div>}
-        {user ? (
-          <div className="component-container">
-            <p>
-              Welcome, <strong>{user.user_metadata.display_name}!</strong>
-            </p>
-            <UserLeagues user={user} />
-          </div>
-        ) : (
-          <p>Loading user information...</p>
-        )}
-      </div>
+      {user ? (
+        <div className="container">
+          <h1>Dashboard</h1>
+          <Message
+            username={user.user_metadata.display_name}
+            message={message}
+          />
+          <UserLeagues user={user} setMessage={setMessage} />
+        </div>
+      ) : (
+        <p>Loading user information...</p>
+      )}
       <Footer />
     </div>
   );

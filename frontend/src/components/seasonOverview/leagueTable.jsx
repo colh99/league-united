@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const LeagueTable = ({ leagueTable }) => {
   return (
-    <div className="component-container">
+    <div className="sub-component-container">
       <h3>League Table</h3>
       <div className="league-table-container">
         <table className="league-table">
