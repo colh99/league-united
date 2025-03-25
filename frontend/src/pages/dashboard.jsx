@@ -4,8 +4,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import "../styles/dashboard.css";
-import UserLeagues from "../components/dashboard/userLeagues";
+import UserEntities from "../components/dashboard/userEntities";
 import Message from "../components/dashboard/message";
+import { getUserLeagues, deleteLeague, getUserTeams, deleteTeam } from "../api/userData"; // Import the API calls for leagues
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -53,7 +54,22 @@ const Dashboard = () => {
             username={user.user_metadata.display_name}
             message={message}
           />
-          <UserLeagues user={user} setMessage={setMessage} />
+          <UserEntities
+            user={user}
+            setMessage={setMessage}
+            entityType="leagues"
+            fetchEntities={getUserLeagues}
+            deleteEntity={deleteLeague}
+            idField="league_id"
+          />
+          <UserEntities
+            user={user}
+            setMessage={setMessage}
+            entityType="teams"
+            fetchEntities={getUserTeams}
+            deleteEntity={deleteTeam}
+            idField="team_id"
+          />
         </div>
       ) : (
         <p>Loading user information...</p>

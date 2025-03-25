@@ -3,19 +3,46 @@ import Footer from "../components/footer";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import LeagueForm from "../components/forms/leagueForm";
-import { createLeague, updateLeague, getLeagueById } from '../api/userData'; // Import the API functions
+import TeamForm from "../components/forms/teamForm";
 import { createClient } from "@supabase/supabase-js";
+import { createLeague, updateLeague, getLeagueById, createTeam, updateTeam, getTeamById } from '../api/userData'; // Import the API functions
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const entityConfig = {
+  leagues: {
+    formComponent: LeagueForm,
+    create: createLeague,
+    update: updateLeague,
+    getById: getLeagueById,
+    successMessage: {
+      create: 'League created successfully!',
+      update: 'League updated successfully!',
+    },
+  },
+  teams: {
+    formComponent: TeamForm,
+    create: createTeam,
+    update: updateTeam,
+    getById: getTeamById,
+    successMessage: {
+      create: 'Team created successfully!',
+      update: 'Team updated successfully!',
+    },
+  },
+  // Add more configurations for other entity types as needed
+};
+
 const EntityForm = () => {
   const { entityType, id } = useParams();
   const [initialData, setInitialData] = useState(null);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  const config = entityConfig[entityType];
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,12 +61,10 @@ const EntityForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let data;
-        if (entityType === "league" && id) {
-          data = await getLeagueById(id);
+        if (config && id) {
+          const data = await config.getById(id);
+          setInitialData(data);
         }
-        // Add more cases for other entity types if needed
-        setInitialData(data);
       } catch (error) {
         console.error("Error fetching entity data:", error);
       }
@@ -48,35 +73,30 @@ const EntityForm = () => {
     if (id) {
       fetchData();
     }
-  }, [entityType, id]);
+  }, [config, id]);
 
   const handleSubmit = async (data) => {
     try {
-      if (id) {
-        await updateLeague(id, data);
-        navigate('/dashboard', { state: { message: 'League updated successfully!' } });
-      } else {
-        await createLeague(data);
-        navigate('/dashboard', { state: { message: 'League created successfully!' } });
+      if (config) {
+        if (id) {
+          await config.update(id, data);
+          navigate('/dashboard', { state: { message: config.successMessage.update } });
+        } else {
+          await config.create(data);
+          navigate('/dashboard', { state: { message: config.successMessage.create } });
+        }
+        console.log(id ? 'Updated entity:' : 'Created entity:', data);
       }
-      console.log(id ? 'Updated entity:' : 'Created entity:', data);
     } catch (error) {
-      console.error('Error submitting league data:', error);
+      console.error(`Error submitting ${entityType} data:`, error);
     }
   };
 
-  let FormComponent;
-  switch (entityType) {
-    case "league":
-      FormComponent = LeagueForm;
-      break;
-    // Add more cases for other forms if needed
-    default:
-      FormComponent = function InvalidEntityType() {
-        return <p>Invalid entity type</p>;
-      };
-      FormComponent.displayName = "InvalidEntityType";
+  if (!config) {
+    return <p>Invalid entity type</p>;
   }
+
+  const FormComponent = config.formComponent;
 
   return (
     <div>
