@@ -19,10 +19,10 @@ function FixturesList({ seasonId, teamId }) {
         } else if (seasonId) {
           data = await getMatchesBySeason(seasonId);
         }
-        setFixtures(data);
+        setFixtures(data || []); // Set fixtures to an empty array if data is null
 
         // Find the last month with fixtures
-        if (data.length > 0) {
+        if (data && data.length > 0) {
           const lastFixtureDate = new Date(
             Math.max(...data.map((fixture) => new Date(fixture.match_date)))
           );
@@ -98,6 +98,10 @@ function FixturesList({ seasonId, teamId }) {
   };
 
   const renderList = () => {
+    if (fixtures.length === 0) {
+      return <div>No matches available.</div>;
+    }
+
     return fixtures.map((fixture) => {
       const fixtureDate = new Date(fixture.match_date);
       const dateString = fixtureDate.toLocaleDateString();
@@ -165,7 +169,6 @@ function FixturesList({ seasonId, teamId }) {
       );
     });
   };
-  
 
   if (error) {
     return <div>Error: {error}</div>;

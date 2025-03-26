@@ -112,10 +112,7 @@ const getMatchesBySeason = async (req, res) => {
     .eq("season_id", req.params.seasonId);
 
   if (error) return res.status(400).json({ error: error.message });
-  if (!matches.length)
-    return res
-      .status(404)
-      .json({ error: `No matches found for season ${req.params.seasonId}.` });
+  if (!matches.length) return res.status(200).json(null);
 
   res.status(200).json(matches);
 };
@@ -168,13 +165,9 @@ const getMatchesByTeam = async (req, res) => {
     .or(`home_team_id.eq.${req.params.teamId},away_team_id.eq.${req.params.teamId}`);
 
   if (error) return res.status(400).json({ error: error.message });
-  if (!matches.length)
-    return res
-      .status(404)
-      .json({ error: `No matches found for team ${req.params.teamId}.` });
+  if (!matches.length) return res.status(200).json(null);
 
   res.status(200).json(matches);
 };
-
 
 module.exports = { getMatchById, getMatchesBySeason, getMatchesByTeam };

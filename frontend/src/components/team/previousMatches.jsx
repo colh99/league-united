@@ -8,66 +8,70 @@ const PreviousMatches = ({ matches, reports, teamId }) => {
         <h3 className="matches-title">Previous Results</h3>
         <p>View team schedule</p>
       </Link>
-      <ul className="matches-list">
-        {matches.map((match, index) => {
-          const matchDate = new Date(match.match_date); // Parse match_date as Date object
-          const isHomeTeam = match.home_team_id === parseInt(teamId);
-          const opponentName = isHomeTeam
-            ? match.away_team.name
-            : match.home_team.name;
-          const homeOrAway = isHomeTeam ? "vs" : "@";
+      {matches.length > 0 ? (
+        <ul className="matches-list">
+          {matches.map((match, index) => {
+            const matchDate = new Date(match.match_date); // Parse match_date as Date object
+            const isHomeTeam = match.home_team_id === parseInt(teamId);
+            const opponentName = isHomeTeam
+              ? match.away_team.name
+              : match.home_team.name;
+            const homeOrAway = isHomeTeam ? "vs" : "@";
 
-          // Find the report for the current match
-          const report = reports.find(
-            (report) => report.match_id === match.match_id
-          );
-          const result = report
-            ? `${report.home_team_score} - ${report.away_team_score}`
-            : "No report";
+            // Find the report for the current match
+            const report = reports.find(
+              (report) => report.match_id === match.match_id
+            );
+            const result = report
+              ? `${report.home_team_score} - ${report.away_team_score}`
+              : "No report";
 
-          let outcome = "";
-          let outcomeClass = "";
-          if (report) {
-            const { result: matchResult } = report;
-            if (matchResult === "home_win") {
-              outcome = isHomeTeam ? "W" : "L";
-              outcomeClass = isHomeTeam ? "win" : "loss";
-            } else if (matchResult === "away_win") {
-              outcome = isHomeTeam ? "L" : "W";
-              outcomeClass = isHomeTeam ? "loss" : "win";
-            } else if (matchResult === "draw") {
-              outcome = "D";
-              outcomeClass = "draw";
+            let outcome = "";
+            let outcomeClass = "";
+            if (report) {
+              const { result: matchResult } = report;
+              if (matchResult === "home_win") {
+                outcome = isHomeTeam ? "W" : "L";
+                outcomeClass = isHomeTeam ? "win" : "loss";
+              } else if (matchResult === "away_win") {
+                outcome = isHomeTeam ? "L" : "W";
+                outcomeClass = isHomeTeam ? "loss" : "win";
+              } else if (matchResult === "draw") {
+                outcome = "D";
+                outcomeClass = "draw";
+              }
             }
-          }
 
-          return (
-            <Link to={`/matches/${match.match_id}`} key={match.match_id}>
-              <li key={index} className="match-item">
-                <div className="match-header">
-                  <span className="match-date">
-                    {matchDate.toLocaleDateString()}{" "}
-                    {matchDate.toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                  <span className="match-opponent">
-                    {homeOrAway} {opponentName}
-                  </span>
-                </div>
-                <div className="match-details">
-                  <span className="match-venue">Venue: {match.venue.name}</span>
-                  <span className="match-result">
-                    Result: {result} (
-                    <span className={outcomeClass}>{outcome}</span>)
-                  </span>
-                </div>
-              </li>
-            </Link>
-          );
-        })}
-      </ul>
+            return (
+              <Link to={`/matches/${match.match_id}`} key={match.match_id}>
+                <li key={index} className="match-item">
+                  <div className="match-header">
+                    <span className="match-date">
+                      {matchDate.toLocaleDateString()}{" "}
+                      {matchDate.toLocaleTimeString([], {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span className="match-opponent">
+                      {homeOrAway} {opponentName}
+                    </span>
+                  </div>
+                  <div className="match-details">
+                    <span className="match-venue">Venue: {match.venue.name}</span>
+                    <span className="match-result">
+                      Result: {result} (
+                      <span className={outcomeClass}>{outcome}</span>)
+                    </span>
+                  </div>
+                </li>
+              </Link>
+            );
+          })}
+        </ul>
+      ) : (
+        <p>No matches available.</p>
+      )}
     </div>
   );
 };

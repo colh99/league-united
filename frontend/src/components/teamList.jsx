@@ -8,7 +8,6 @@ const TeamList = () => {
   useEffect(() => {
     const fetchTeams = async () => {
       const data = await getTeams();
-      //console.log(data);
       setTeams(data);
     };
 
@@ -20,24 +19,24 @@ const TeamList = () => {
       <div>
         {teams.map((entry, index) => (
           <div key={index}>
-            <h3><Link to={`/teams/${entry.teams.team_id}`}>{entry.teams.name}</Link></h3>
+            <h3><Link to={`/teams/${entry.team_id}`}>{entry.name}</Link></h3>
             <img
-              src={entry.teams.logo_url}
-              alt={entry.teams.name}
+              src={entry.logo_url}
+              alt={entry.name}
               width="100"
               height="100"
             />
             <p>
-              <strong>Nickname:</strong> {entry.teams.nickname}
+              <strong>Nickname:</strong> {entry.nickname || "N/A"}
             </p>
             <p>
-              <strong>Founded:</strong> {entry.teams.founded_year}
+              <strong>Founded:</strong> {entry.founded_year || "N/A"}
             </p>
             <p>
-              <strong>Primary Venue:</strong> {entry.venues.name}
+              <strong>Primary Venue:</strong> {entry.teams_venues[0]?.venues.name || "N/A"}
             </p>
             <p>
-              <strong>Email:</strong> {entry.teams.contact_email}
+              <strong>Email:</strong> {entry.contact_email || "N/A"}
             </p>
           </div>
         ))}

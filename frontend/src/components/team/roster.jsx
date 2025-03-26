@@ -13,20 +13,24 @@ const Roster = ({ roster }) => {
   return (
     <div className="component-container">
       <h3 className="roster-title">Roster</h3>
-      <ul className="roster-list">
-        {sortedRoster.map((player, index) => (
-          <li key={index} className="roster-item">
-            <span className="roster-number">#{player.jersey_number}</span>
-            <span className="roster-name">
-              {player.players.first_name} <span className="roster-last-name">{player.players.last_name}</span>
-              {player.players.known_as && (
-                <span className="roster-known-as">({player.players.known_as})</span>
-              )}
-            </span>
-            <span className="roster-position">{player.position}</span>
-          </li>
-        ))}
-      </ul>
+      {sortedRoster.length > 0 ? (
+        <ul className="roster-list">
+          {sortedRoster.map((player, index) => (
+            <li key={index} className="roster-item">
+              <span className="roster-number">#{player.jersey_number}</span>
+              <span className="roster-name">
+                {player.players.first_name} <span className="roster-last-name">{player.players.last_name}</span>
+                {player.players.known_as && (
+                  <span className="roster-known-as">({player.players.known_as})</span>
+                )}
+              </span>
+              <span className="roster-position">{player.position}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No players in the roster.</p>
+      )}
     </div>
   );
 };

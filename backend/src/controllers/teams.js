@@ -3,30 +3,49 @@ const supabase = require("../db/supabase");
 // Get all teams with their primary venue details
 const getTeams = async (req, res) => {
   const { data, error } = await supabase
-    .from("teams_venues") // Query the join table
-    .select("teams(*), venues(name)") // Fetch related teams and venues
-    .eq("is_primary", true); // Only get the primary venue
+    .from("teams")
+    .select(`
+      *,
+      teams_venues!left(venues(name))
+    `)
+    .eq("teams_venues.is_primary", true); // Only get the primary venue
 
   if (error) {
     res.status(400).json({ error: error.message });
   } else {
-    res.status(200).json(data);
+    const formattedData = data.map(team => {
+      if (!team.teams_venues || team.teams_venues.length === 0) {
+        return {
+          ...team,
+          teams_venues: { 0: { venues: [] } }
+        };
+      }
+      return team;
+    });
+    res.status(200).json(formattedData);
   }
 };
 
 // Get a team by ID for the team page
 const getTeamById = async (req, res) => {
   const { team_id } = req.params;
+  console.log("Fetching team with ID:", team_id); // Log the team ID
 
   // Fetch team details
   const { data: teamData, error: teamError } = await supabase
     .from("teams")
     .select("*")
     .eq("team_id", team_id)
-    .single();
+    .maybeSingle(); // Use maybeSingle to handle no rows returned
 
   if (teamError) {
+    console.log("Error fetching team:", teamError);
     return res.status(400).json({ error: teamError.message });
+  }
+
+  if (!teamData) {
+    console.log("No team found with ID:", team_id);
+    return res.status(404).json({ error: "Team not found" });
   }
 
   // Fetch roster
@@ -53,7 +72,7 @@ const getTeamById = async (req, res) => {
     return res.status(400).json({ error: upcomingError.message });
   }
 
-    // Fetch up to 3 previous matches with opposing team names, venue names, and match reports
+  // Fetch up to 3 previous matches with opposing team names, venue names, and match reports
   const { data: previousMatchesData, error: previousError } = await supabase
     .from("matches")
     .select(`
@@ -66,7 +85,7 @@ const getTeamById = async (req, res) => {
     .lt("match_date", now) // Get matches in the past
     .order("match_date", { ascending: false }) // Most recent previous matches first
     .limit(3);
-  
+
   if (previousError) {
     return res.status(400).json({ error: previousError.message });
   }
@@ -87,7 +106,7 @@ const getTeamById = async (req, res) => {
     .select("venues(*)")
     .eq("team_id", team_id)
     .eq("is_primary", true) // Only gets the primary venue
-    .single();
+    .maybeSingle(); // Use maybeSingle to handle no rows returned
 
   if (venueError) {
     return res.status(400).json({ error: venueError.message });
@@ -97,20 +116,20 @@ const getTeamById = async (req, res) => {
     .from("managers")
     .select("*")
     .eq("team_id", team_id)
-    .single();
+    .maybeSingle(); // Use maybeSingle to handle no rows returned
 
   if (managerError) {
     return res.status(400).json({ error: managerError.message });
   }
 
   res.status(200).json({
-    team: teamData,
-    roster: rosterData,
-    previousMatches: previousMatchesData,
-    match_reports: reportsData,
-    upcomingMatches: upcomingMatchesData,
-    primaryVenue: venueData,
-    manager: managerData,
+    team: teamData || {},
+    roster: rosterData || [], 
+    previousMatches: previousMatchesData || [], 
+    match_reports: reportsData || [], 
+    upcomingMatches: upcomingMatchesData || [], 
+    primaryVenue: venueData || {},
+    manager: managerData || {},
   });
 };
 
