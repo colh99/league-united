@@ -306,6 +306,207 @@ const deleteTeam = (req, res) => {
 };
 
 
+// SEASONS
+
+// Get season by id
+const getSeasonById = async (req, res) => {
+  const seasonId = req.params.id;
+
+  try {
+    // Fetch the season details
+    const { data: seasonData, error: seasonError } = await supabase
+      .from("seasons")
+      .select("*")
+      .eq("season_id", seasonId);
+
+    if (seasonError) {
+      console.log("Error fetching season:", seasonError);
+      return res.status(400).json({ error: seasonError.message });
+    }
+
+    if (!seasonData || seasonData.length === 0) {
+      return res.status(404).json({ error: "Season not found" });
+    }
+
+    const season = seasonData[0];
+
+    // Fetch the associated teams from the seasons_teams join table
+    const { data: teamsData, error: teamsError } = await supabase
+      .from("seasons_teams")
+      .select("team_id, teams(name)") // Fetch team_id and team name from the related teams table
+      .eq("season_id", seasonId);
+
+    if (teamsError) {
+      console.log("Error fetching associated teams:", teamsError);
+      return res.status(400).json({ error: teamsError.message });
+    }
+
+    // Add the teams to the season object
+    season.teams = teamsData || [];
+
+    console.log("Season fetched successfully:", season);
+    res.status(200).json(season);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Create a new season
+const createSeason = async (req, res) => {
+  const seasonData = req.body;
+  const { team_ids, ...seasonDetails } = seasonData; // Exclude team_ids from the season data
+
+  try {
+    // Insert the season into the seasons table
+    const { data: seasonDataResult, error: seasonError } = await supabase
+      .from("seasons")
+      .insert(seasonDetails) // Insert only the season details
+      .select();
+
+    if (seasonError) {
+      console.log("Error creating season:", seasonError);
+      return res.status(400).json({ error: seasonError.message });
+    }
+
+    if (!seasonDataResult || seasonDataResult.length === 0) {
+      console.log("No data returned from insert operation");
+      return res.status(400).json({ error: "Failed to create season" });
+    }
+
+    const createdSeason = seasonDataResult[0];
+    const seasonId = createdSeason.season_id;
+
+    // Insert records into the seasons_teams join table
+    if (team_ids && Array.isArray(team_ids) && team_ids.length > 0) {
+      const seasonsTeamsData = team_ids.map((teamId) => ({
+        season_id: seasonId,
+        team_id: teamId,
+      }));
+
+      const { error: joinTableError } = await supabase
+        .from("seasons_teams")
+        .insert(seasonsTeamsData);
+
+      if (joinTableError) {
+        console.log("Error updating seasons_teams join table:", joinTableError);
+        return res.status(400).json({ error: joinTableError.message });
+      }
+    }
+
+    console.log("Season created successfully:", createdSeason);
+    res.status(201).json(createdSeason);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Update a season
+const updateSeason = async (req, res) => {
+  const seasonId = req.params.id;
+  const seasonData = req.body;
+  const { team_ids, ...seasonDetails } = seasonData; // Exclude team_ids from the season data
+
+  try {
+    // Update the season in the seasons table
+    const { data: seasonDataResult, error: seasonError } = await supabase
+      .from("seasons")
+      .update(seasonDetails) // Update only the season details
+      .select("*")
+      .eq("season_id", seasonId);
+
+    if (seasonError) {
+      console.log("Error updating season:", seasonError);
+      return res.status(400).json({ error: seasonError.message });
+    }
+
+    if (!seasonDataResult || seasonDataResult.length === 0) {
+      console.log("No data returned from update operation");
+      return res.status(404).json({ error: "Season not found" });
+    }
+
+    const updatedSeason = seasonDataResult[0];
+
+    // Update records in the seasons_teams join table
+    if (team_ids && Array.isArray(team_ids) && team_ids.length > 0) {
+      // Delete existing records for the season
+      const { error: deleteError } = await supabase
+        .from("seasons_teams")
+        .delete()
+        .eq("season_id", seasonId);
+
+      if (deleteError) {
+        console.log("Error deleting from seasons_teams join table:", deleteError);
+        return res.status(400).json({ error: deleteError.message });
+      }
+
+      // Insert new records
+      const seasonsTeamsData = team_ids.map((teamId) => ({
+        season_id: seasonId,
+        team_id: teamId,
+      }));
+
+      const { error: joinTableError } = await supabase
+        .from("seasons_teams")
+        .insert(seasonsTeamsData);
+
+      if (joinTableError) {
+        console.log("Error updating seasons_teams join table:", joinTableError);
+        return res.status(400).json({ error: joinTableError.message });
+      }
+    }
+
+    console.log("Season updated successfully:", updatedSeason);
+    res.status(200).json(updatedSeason);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Delete a season
+const deleteSeason = async (req, res) => {
+  const seasonId = req.params.id;
+
+  try {
+    // Delete the season from the seasons table
+    const { data: seasonDataResult, error: seasonError } = await supabase
+      .from("seasons")
+      .delete()
+      .eq("season_id", seasonId)
+      .select();
+
+    if (seasonError) {
+      console.log("Error deleting season:", seasonError);
+      return res.status(400).json({ error: seasonError.message });
+    }
+
+    if (!seasonDataResult || seasonDataResult.length === 0) {
+      console.log("No data returned from delete operation");
+      return res.status(404).json({ error: "Season not found" });
+    }
+
+    // Delete records from the seasons_teams join table
+    const { error: joinTableError } = await supabase
+      .from("seasons_teams")
+      .delete()
+      .eq("season_id", seasonId);
+
+    if (joinTableError) {
+      console.log("Error deleting from seasons_teams join table:", joinTableError);
+      return res.status(400).json({ error: joinTableError.message });
+    }
+
+    console.log("Season deleted successfully:", seasonDataResult[0]);
+    res.status(200).json(seasonDataResult[0]);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 module.exports = {
   getUserLeagues,
   getLeagueById,
@@ -317,4 +518,8 @@ module.exports = {
   createTeam,
   updateTeam,
   deleteTeam,
+  getSeasonById,
+  createSeason,
+  updateSeason,
+  deleteSeason,
 };

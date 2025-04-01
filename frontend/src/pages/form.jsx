@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import LeagueForm from "../components/forms/leagueForm";
 import TeamForm from "../components/forms/teamForm";
+import SeasonForm from "../components/forms/seasonForm";
 import { createClient } from "@supabase/supabase-js";
-import { createLeague, updateLeague, getLeagueById, createTeam, updateTeam, getTeamById } from '../api/userData'; // Import the API functions
+import { createLeague, updateLeague, getLeagueById, createTeam, updateTeam, getTeamById, createSeason, updateSeason, getSeasonById, getUserTeams } from '../api/userData'; // Import the API functions
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -33,12 +34,24 @@ const entityConfig = {
       update: 'Team updated successfully!',
     },
   },
+  seasons: {
+    formComponent: SeasonForm,
+    create: createSeason,
+    update: updateSeason,
+    getById: getSeasonById,
+    getAdditionalData: getUserTeams, // Add getUserTeams here
+    successMessage: {
+      create: 'Season created successfully!',
+      update: 'Season updated successfully!',
+    },
+  },
   // Add more configurations for other entity types as needed
 };
 
 const EntityForm = () => {
   const { entityType, id } = useParams();
   const [initialData, setInitialData] = useState(null);
+  const [additionalData, setAdditionalData] = useState(null); // State for additional data
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
@@ -61,31 +74,47 @@ const EntityForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (config && id) {
+        if (config && id && id !== "new") {
           const data = await config.getById(id);
           setInitialData(data);
+        } else if (id === "new") {
+          // Handle creation case (e.g., pre-fill with defaults or leave empty)
+          setInitialData(null);
         }
       } catch (error) {
         console.error("Error fetching entity data:", error);
       }
     };
 
-    if (id) {
-      fetchData();
-    }
+    fetchData();
   }, [config, id]);
+
+  useEffect(() => {
+    const fetchAdditionalData = async () => {
+      try {
+        if (config && config.getAdditionalData) {
+          const data = await config.getAdditionalData();
+          setAdditionalData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching additional data:", error);
+      }
+    };
+
+    fetchAdditionalData();
+  }, [config]);
 
   const handleSubmit = async (data) => {
     try {
       if (config) {
-        if (id) {
+        if (id && id !== "new") {
           await config.update(id, data);
           navigate('/dashboard', { state: { message: config.successMessage.update } });
         } else {
           await config.create(data);
           navigate('/dashboard', { state: { message: config.successMessage.create } });
         }
-        console.log(id ? 'Updated entity:' : 'Created entity:', data);
+        console.log(id && id !== "new" ? 'Updated entity:' : 'Created entity:', data);
       }
     } catch (error) {
       console.error(`Error submitting ${entityType} data:`, error);
@@ -102,9 +131,13 @@ const EntityForm = () => {
     <div>
       <Header />
       <div className="container">
-        <h2>{id ? `Edit ${entityType}` : `Create ${entityType}`}</h2>
+        <h2>{id && id !== "new" ? `Edit ${entityType}` : `Create ${entityType}`}</h2>
         {user ? (
-          <FormComponent initialData={initialData} onSubmit={handleSubmit} />
+          <FormComponent
+            initialData={initialData}
+            additionalData={additionalData} // Pass additional data to the form
+            onSubmit={handleSubmit}
+          />
         ) : (
           <p>Loading user information...</p>
         )}

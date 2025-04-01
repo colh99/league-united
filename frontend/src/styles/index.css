@@ -304,6 +304,7 @@ button {
   font-size: 1rem;
   cursor: pointer;
   border-radius: 5px;
+  margin-top: 1rem;
 }
 
 button:hover {

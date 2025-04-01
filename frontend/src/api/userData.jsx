@@ -6,7 +6,6 @@ export const getUserLeagues = async () => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -60,7 +59,6 @@ export const createLeague = async (leagueData) => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -91,7 +89,6 @@ export const updateLeague = async (leagueId, leagueData) => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -125,7 +122,6 @@ export const deleteLeague = async (leagueId) => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -158,7 +154,6 @@ export const getUserTeams = async () => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -212,7 +207,6 @@ export const createTeam = async (teamData) => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -243,7 +237,6 @@ export const updateTeam = async (teamId, teamData) => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -277,7 +270,6 @@ export const deleteTeam = async (teamId) => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user.id;
-    console.log("User ID from local storage:", userId);
 
     if (!userId) {
       throw new Error("User ID not found in local storage");
@@ -300,5 +292,124 @@ export const deleteTeam = async (teamId) => {
     console.log("Deleted team with ID", teamId);
   } catch (error) {
     console.error("Error deleting team:", error);
+  }
+};
+
+
+// SEASONS
+
+export const getSeasonById = async (seasonId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/userData/seasons/${seasonId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json();
+    console.log("Fetched season data for", data.headline_year, data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching season:", error);
+    return null;
+  }
+};
+
+export const createSeason = async (seasonData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/userData/seasons`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: userId,
+      },
+      body: JSON.stringify(seasonData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Created season data", data);
+    return data;
+  } catch (error) {
+    console.error("Error creating season:", error);
+    return null;
+  }
+}
+
+export const updateSeason = async (seasonId, seasonData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/userData/seasons/${seasonId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId,
+        },
+        body: JSON.stringify(seasonData),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Updated season data", data);
+    return data;
+  } catch (error) {
+    console.error("Error updating season:", error);
+    return null;
+  }
+};
+
+export const deleteSeason = async (seasonId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/userData/seasons/${seasonId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    console.log("Deleted season with ID", seasonId);
+  } catch (error) {
+    console.error("Error deleting season:", error);
   }
 };

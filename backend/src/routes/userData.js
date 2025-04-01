@@ -37,4 +37,20 @@ router.put("/teams/:id", userDataController.updateTeam);
 // Delete a team
 router.delete("/teams/:id", userDataController.deleteTeam);
 
+
+// SEASONS
+
+// Get season by id
+router.get("/seasons/:id", userDataController.getSeasonById);
+
+// Create a new season
+router.post("/seasons", userDataController.createSeason);
+
+// Update a season
+router.put("/seasons/:id", userDataController.updateSeason);
+
+// Delete a season
+router.delete("/seasons/:id", userDataController.deleteSeason);
+
+
 module.exports = router;
