@@ -304,7 +304,6 @@ button {
   font-size: 1rem;
   cursor: pointer;
   border-radius: 5px;
-  margin-top: 1rem;
 }
 
 button:hover {
@@ -343,4 +342,8 @@ select {
 select:focus {
   border-color: #2980b9; /* Blue border on focus */
   outline: none;
+}
+
+#seasonForm-button {
+  margin-top: 1rem;
 }

@@ -75,7 +75,7 @@ const SeasonForm = ({ initialData, additionalData, onSubmit }) => {
           }
         />
       </label>
-      <button type="submit">Submit</button>
+      <button type="submit" id="seasonForm-button">Submit</button>
     </form>
   );
 };
