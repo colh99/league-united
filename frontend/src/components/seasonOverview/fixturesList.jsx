@@ -8,41 +8,45 @@ const FixturesList = ({ matches, reports, seasonId }) => {
         <h3>Fixtures and Results</h3>
         <p>View season schedule</p>
       </Link>
-      <ul className="fixtures-list">
-        {matches.map((match) => {
-          const report = reports.find(
-            (report) => report.match_id === match.match_id
-          );
-          const matchDate = new Date(match.match_date);
-          const homeTeamName = match.home_team ? match.home_team.name : "Unknown";
-          const awayTeamName = match.away_team ? match.away_team.name : "Unknown";
+      {matches.length === 0 ? (
+        <p className="no-matches">No scheduled matches</p>
+      ) : (
+        <ul className="fixtures-list">
+          {matches.map((match) => {
+            const report = reports.find(
+              (report) => report.match_id === match.match_id
+            );
+            const matchDate = new Date(match.match_date);
+            const homeTeamName = match.home_team ? match.home_team.name : "Unknown";
+            const awayTeamName = match.away_team ? match.away_team.name : "Unknown";
 
-          return (
-            <Link to={`/matches/${match.match_id}`} key={match.match_id}>
-              <li key={match.match_id} className="fixture">
-                <p className="date">
-                  {matchDate.toLocaleDateString()}{" "}
-                  {matchDate.toLocaleTimeString([], {
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                </p>
-                <div className="teams">
-                  <p className="home-team">{homeTeamName}</p>
-                  {report ? (
-                    <p className="score">
-                      {report.home_team_score} - {report.away_team_score}
-                    </p>
-                  ) : (
-                    <p className="score">vs</p>
-                  )}
-                  <p className="away-team">{awayTeamName}</p>
-                </div>
-              </li>
-            </Link>
-          );
-        })}
-      </ul>
+            return (
+              <Link to={`/matches/${match.match_id}`} key={match.match_id}>
+                <li key={match.match_id} className="fixture">
+                  <p className="date">
+                    {matchDate.toLocaleDateString()}{" "}
+                    {matchDate.toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                  <div className="teams">
+                    <p className="home-team">{homeTeamName}</p>
+                    {report ? (
+                      <p className="score">
+                        {report.home_team_score} - {report.away_team_score}
+                      </p>
+                    ) : (
+                      <p className="score">vs</p>
+                    )}
+                    <p className="away-team">{awayTeamName}</p>
+                  </div>
+                </li>
+              </Link>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };

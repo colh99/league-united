@@ -78,21 +78,11 @@ function LeaguesPage() {
     <div>
       <Header />
       <div className="container">
-        {/* Pass the league object directly to LeagueDetails */}
         <LeagueDetails league={league} />
-        {seasons.length > 0 ? (
-          <SeasonOverview
-            seasons={seasons}
-            selectedSeason={selectedSeason}
-            onSeasonChange={setSelectedSeason}
-          />
-        ) : (
-          <div>No seasons are currently associated with this league.</div>
-        )}
         {isOwner && (
           <div className="owner-actions">
             <button
-              className="btn btn-primary"
+              className="add-season-button"
               onClick={() =>
                 navigate(`/form/seasons/new?league_id=${league_id}`)
               }
@@ -101,13 +91,22 @@ function LeaguesPage() {
             </button>
             {selectedSeason && (
               <button
-                className="btn btn-secondary"
+                className="edit-season-button"
                 onClick={() => navigate(`/form/seasons/${selectedSeason}?league_id=${league_id}`)}
               >
                 Edit Selected Season
               </button>
             )}
           </div>
+        )}
+        {seasons.length > 0 ? (
+          <SeasonOverview
+            seasons={seasons}
+            selectedSeason={selectedSeason}
+            onSeasonChange={setSelectedSeason}
+          />
+        ) : (
+          <div>No seasons are currently associated with this league.</div>
         )}
       </div>
       <Footer />
