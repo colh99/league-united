@@ -1,5 +1,13 @@
 const supabase = require("../db/supabase");
 
+const cleanData = (data) => {
+  const cleanedData = {};
+  for (const key in data) {
+    cleanedData[key] = data[key] === "" ? null : data[key];
+  }
+  return cleanedData;
+};
+
 // Get all leagues belonging to a given user
 const getUserLeagues = (req, res) => {
   const authHeader = req.headers.authorization;
@@ -531,6 +539,169 @@ const deleteSeason = async (req, res) => {
 };
 
 
+// OFFICIALS
+
+// Get all officials belonging to a given user
+const getUserOfficials = (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader;
+
+  supabase
+    .from("officials")
+    .select("*")
+    .eq("user_id", user_id)
+    .then(({ data, error }) => {
+      if (error) {
+        console.log("Error fetching user officials:", error);
+        res.status(400).json({ error: error.message });
+      } else if (data.length === 0) {
+        res.status(200).json(null); // Return null if no data is found
+      } else {
+        res.status(200).json(data);
+      }
+    });
+};
+
+// Get a single official by ID
+const getOfficialById = (req, res) => {
+  const officialId = req.params.id;
+
+  supabase
+    .from("officials")
+    .select("*")
+    .eq("official_id", officialId)
+    .then(({ data, error }) => {
+      if (error) {
+        console.log("Error fetching official:", error);
+        res.status(400).json({ error: error.message });
+      } else if (data.length === 0) {
+        res.status(404).json({ error: "Official not found" });
+      } else {
+        res.status(200).json(data[0]);
+      }
+    });
+};
+
+// Create a new official
+const createOfficial = (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader;
+  let officialData = req.body;
+  officialData.user_id = user_id;
+
+  // Clean the data to replace empty values with NULL
+  officialData = cleanData(officialData);
+
+  supabase
+    .from("officials")
+    .insert(officialData)
+    .select() // Specify that we want the inserted data to be returned
+    .then(({ data, error }) => {
+      if (error) {
+        console.log("Error creating official:", error);
+        res.status(400).json({ error: error.message });
+      } else if (!data || data.length === 0) {
+        console.log("No data returned from insert operation");
+        res.status(400).json({ error: "Failed to create official" });
+      } else {
+        console.log("Official created successfully:", data);
+        res.status(201).json(data[0]);
+      }
+    })
+    .catch((err) => {
+      console.error("Unexpected error:", err);
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+
+// Update an official
+const updateOfficial = (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader;
+  const officialId = req.params.id;
+  let officialData = { ...req.body };
+
+  // Ensure official_id is not included in the update payload
+  delete officialData.official_id;
+
+  // Clean the data to replace empty values with NULL
+  officialData = cleanData(officialData);
+
+  supabase
+    .from("officials")
+    .update(officialData)
+    .select("*")
+    .eq("official_id", officialId)
+    .eq("user_id", user_id)
+    .then(({ data, error }) => {
+      if (error) {
+        console.log("Error updating official:", error);
+        res.status(400).json({ error: error.message });
+      } else if (!data || data.length === 0) {
+        console.log("No data returned from update operation");
+        res.status(404).json({ error: "Official not found" });
+      } else {
+        console.log("Official updated successfully:", data);
+        res.status(200).json(data[0]);
+      }
+    })
+    .catch((err) => {
+      console.error("Unexpected error:", err);
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+
+// Delete an official
+const deleteOfficial = (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader;
+  const officialId = req.params.id;
+
+  supabase
+    .from("officials")
+    .delete()
+    .eq("official_id", officialId)
+    .eq("user_id", user_id)
+    .select() // Specify that we want the deleted data to be returned
+    .then(({ data, error }) => {
+      if (error) {
+        console.log("Error deleting official:", error);
+        res.status(400).json({ error: error.message });
+      } else if (!data || data.length === 0) {
+        console.log("No data returned from delete operation");
+        res.status(404).json({ error: "Official not found" });
+      } else {
+        console.log("Official deleted successfully:", data);
+        res.status(200).json(data[0]);
+      }
+    })
+    .catch((err) => {
+      console.error("Unexpected error:", err);
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+
+
 module.exports = {
   getUserLeagues,
   getLeagueById,
@@ -546,4 +717,9 @@ module.exports = {
   createSeason,
   updateSeason,
   deleteSeason,
+  getUserOfficials,
+  getOfficialById,
+  createOfficial,
+  updateOfficial,
+  deleteOfficial,
 };

@@ -53,4 +53,21 @@ router.put("/seasons/:id", userDataController.updateSeason);
 router.delete("/seasons/:id", userDataController.deleteSeason);
 
 
+// OFFICIALS
+
+// Get all officials belonging to a given user
+router.get("/officials", userDataController.getUserOfficials);
+
+// Get a single official by ID
+router.get("/officials/:id", userDataController.getOfficialById);
+
+// Create a new official
+router.post("/officials", userDataController.createOfficial);
+
+// Update an official
+router.put("/officials/:id", userDataController.updateOfficial);
+
+// Delete an official
+router.delete("/officials/:id", userDataController.deleteOfficial);
+
 module.exports = router;

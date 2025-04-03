@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const UserEntities = ({ user, setMessage, entityType, fetchEntities, deleteEntity, idField }) => {
+const UserEntities = ({ user, setMessage, entityType, entityTypeSingular, fetchEntities, deleteEntity, idField }) => {
   const [entities, setEntities] = useState([]);
 
   useEffect(() => {
@@ -57,8 +57,14 @@ const UserEntities = ({ user, setMessage, entityType, fetchEntities, deleteEntit
             <li key={entity[idField]}>
               <Link to={`/${entityType}/${entity[idField]}`}>
                 <div className="entity-info">
-                  <h3>{entity.name}</h3>
-                  <img src={entity.logo_url} alt={entity.name} />
+                  <h3>
+                    {entityType === "officials"
+                      ? `${entity.first_name} ${entity.last_name}` // Combine first and last name for officials
+                      : entity.name} {/* Use name for other entity types */}
+                  </h3>
+                  {entity.logo_url && ( // Only render the image if logo_url exists
+                    <img src={entity.logo_url} alt={entity.name} />
+                  )}
                 </div>
               </Link>
               <div className="button-container">
@@ -76,10 +82,10 @@ const UserEntities = ({ user, setMessage, entityType, fetchEntities, deleteEntit
           ))}
         </ul>
       ) : (
-        <p>You do not own any {entityType}</p>
+        <p>You do not manage any {entityType}</p>
       )}
       <Link to={`/form/${entityType}`}>
-        <button>Create New {entityType.charAt(0).toUpperCase() + entityType.slice(1)}</button>
+        <button>Create New {entityTypeSingular.charAt(0).toUpperCase() + entityTypeSingular.slice(1)}</button>
       </Link>
     </div>
   );
@@ -92,11 +98,12 @@ UserEntities.propTypes = {
       display_name: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
-  setMessage: PropTypes.func.isRequired, // Add setMessage prop type
-  entityType: PropTypes.string.isRequired, // Add entityType prop type
-  fetchEntities: PropTypes.func.isRequired, // Add fetchEntities prop type
-  deleteEntity: PropTypes.func.isRequired, // Add deleteEntity prop type
-  idField: PropTypes.string.isRequired, // Add idField prop type
+  setMessage: PropTypes.func.isRequired, 
+  entityType: PropTypes.string.isRequired, 
+  entityTypeSingular: PropTypes.string.isRequired, 
+  fetchEntities: PropTypes.func.isRequired, 
+  deleteEntity: PropTypes.func.isRequired, 
+  idField: PropTypes.string.isRequired,
 };
 
 export default UserEntities;

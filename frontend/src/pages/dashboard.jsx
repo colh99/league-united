@@ -6,7 +6,7 @@ import Footer from "../components/footer";
 import "../styles/dashboard.css";
 import UserEntities from "../components/dashboard/userEntities";
 import Message from "../components/dashboard/message";
-import { getUserLeagues, deleteLeague, getUserTeams, deleteTeam } from "../api/userData"; // Import the API calls for leagues
+import { getUserLeagues, deleteLeague, getUserTeams, deleteTeam, getUserOfficials, deleteOfficial } from "../api/userData"; // Import the API calls
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -58,6 +58,7 @@ const Dashboard = () => {
             user={user}
             setMessage={setMessage}
             entityType="leagues"
+            entityTypeSingular="league"
             fetchEntities={getUserLeagues}
             deleteEntity={deleteLeague}
             idField="league_id"
@@ -66,9 +67,19 @@ const Dashboard = () => {
             user={user}
             setMessage={setMessage}
             entityType="teams"
+            entityTypeSingular="team"
             fetchEntities={getUserTeams}
             deleteEntity={deleteTeam}
             idField="team_id"
+          />
+          <UserEntities
+            user={user}
+            setMessage={setMessage}
+            entityType="officials"
+            entityTypeSingular="official"
+            fetchEntities={getUserOfficials}
+            deleteEntity={deleteOfficial}
+            idField="official_id"
           />
         </div>
       ) : (

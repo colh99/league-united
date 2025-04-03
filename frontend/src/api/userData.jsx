@@ -413,3 +413,150 @@ export const deleteSeason = async (seasonId) => {
     console.error("Error deleting season:", error);
   }
 };
+
+// OFFICIALS
+
+export const getUserOfficials = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/userData/officials`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: userId,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Fetched user officials data", data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching user officials:", error);
+    return [];
+  }
+};
+
+export const getOfficialById = async (officialId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/userData/officials/${officialId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json();
+    console.log("Fetched official data for", data.name, data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching official:", error);
+    return null;
+  }
+};
+
+export const createOfficial = async (officialData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/userData/officials`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: userId,
+      },
+      body: JSON.stringify(officialData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Created official data", data);
+    return data;
+  } catch (error) {
+    console.error("Error creating official:", error);
+    return null;
+  }
+}
+
+export const updateOfficial = async (officialId, officialData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/userData/officials/${officialId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId,
+        },
+        body: JSON.stringify(officialData),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Updated official data", data);
+    return data;
+  } catch (error) {
+    console.error("Error updating official:", error);
+    return null;
+  }
+}
+
+export const deleteOfficial = async (officialId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/userData/officials/${officialId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    console.log("Deleted official with ID", officialId);
+  } catch (error) {
+    console.error("Error deleting official:", error);
+  }
+};

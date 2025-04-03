@@ -5,8 +5,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import LeagueForm from "../components/forms/leagueForm";
 import TeamForm from "../components/forms/teamForm";
 import SeasonForm from "../components/forms/seasonForm";
+import OfficialForm from "../components/forms/officialForm";
 import { createClient } from "@supabase/supabase-js";
-import { createLeague, updateLeague, getLeagueById, createTeam, updateTeam, getTeamById, createSeason, updateSeason, getSeasonById, getUserTeams } from '../api/userData'; // Import the API functions
+import { createLeague, updateLeague, getLeagueById, 
+         createTeam, updateTeam, getTeamById, 
+         createSeason, updateSeason, getSeasonById, getUserTeams, 
+         createOfficial, updateOfficial, getOfficialById } from '../api/userData'; // Import the API functions
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -45,11 +49,25 @@ const entityConfig = {
       update: 'Season updated successfully!',
     },
   },
+  officials: {
+    formComponent: OfficialForm,
+    create: createOfficial,
+    update: updateOfficial,
+    getById: getOfficialById,
+    successMessage: {
+      create: 'Official created successfully!',
+      update: 'Official updated successfully!',
+    },
+  }
   // Add more configurations for other entity types as needed
 };
 
 const EntityForm = () => {
   const { entityType, id } = useParams();
+  const entityTypeSingular =
+    entityType.slice(-1) === "s"
+      ? entityType.slice(0, -1).charAt(0).toUpperCase() + entityType.slice(0, -1).slice(1)
+      : entityType.charAt(0).toUpperCase() + entityType.slice(1);
   const [initialData, setInitialData] = useState(null);
   const [additionalData, setAdditionalData] = useState(null); // State for additional data
   const [user, setUser] = useState(null);
@@ -131,7 +149,7 @@ const EntityForm = () => {
     <div>
       <Header />
       <div className="container">
-        <h2>{id && id !== "new" ? `Edit ${entityType}` : `Create ${entityType}`}</h2>
+        <h2>{id && id !== "new" ? `Edit ${entityTypeSingular}` : `Create ${entityTypeSingular}`}</h2>
         {user ? (
           <FormComponent
             initialData={initialData}
