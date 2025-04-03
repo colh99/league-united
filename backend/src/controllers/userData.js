@@ -354,10 +354,20 @@ const getSeasonById = async (req, res) => {
 
 // Create a new season
 const createSeason = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader; // Extract user_id from the authorization header
   const seasonData = req.body;
   const { team_ids, ...seasonDetails } = seasonData; // Exclude team_ids from the season data
 
   try {
+    // Add user_id to the season details
+    seasonDetails.user_id = user_id;
+
     // Insert the season into the seasons table
     const { data: seasonDataResult, error: seasonError } = await supabase
       .from("seasons")
@@ -382,6 +392,7 @@ const createSeason = async (req, res) => {
       const seasonsTeamsData = team_ids.map((teamId) => ({
         season_id: seasonId,
         team_id: teamId,
+        user_id: user_id, // Include user_id in the join table
       }));
 
       const { error: joinTableError } = await supabase
@@ -404,17 +415,28 @@ const createSeason = async (req, res) => {
 
 // Update a season
 const updateSeason = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader; // Extract user_id from the authorization header
   const seasonId = req.params.id;
   const seasonData = req.body;
   const { team_ids, ...seasonDetails } = seasonData; // Exclude team_ids from the season data
 
   try {
+    // Add user_id to the season details
+    seasonDetails.user_id = user_id;
+
     // Update the season in the seasons table
     const { data: seasonDataResult, error: seasonError } = await supabase
       .from("seasons")
       .update(seasonDetails) // Update only the season details
       .select("*")
-      .eq("season_id", seasonId);
+      .eq("season_id", seasonId)
+      .eq("user_id", user_id); // Ensure the user_id matches
 
     if (seasonError) {
       console.log("Error updating season:", seasonError);
@@ -434,7 +456,8 @@ const updateSeason = async (req, res) => {
       const { error: deleteError } = await supabase
         .from("seasons_teams")
         .delete()
-        .eq("season_id", seasonId);
+        .eq("season_id", seasonId)
+        .eq("user_id", user_id); // Ensure the user_id matches
 
       if (deleteError) {
         console.log("Error deleting from seasons_teams join table:", deleteError);
@@ -445,6 +468,7 @@ const updateSeason = async (req, res) => {
       const seasonsTeamsData = team_ids.map((teamId) => ({
         season_id: seasonId,
         team_id: teamId,
+        user_id: user_id, // Include user_id in the join table
       }));
 
       const { error: joinTableError } = await supabase
