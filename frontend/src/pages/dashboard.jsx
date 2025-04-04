@@ -6,15 +6,19 @@ import Footer from "../components/footer";
 import "../styles/dashboard.css";
 import UserEntities from "../components/dashboard/userEntities";
 import Message from "../components/dashboard/message";
-import { getUserLeagues, deleteLeague, getUserTeams, deleteTeam, getUserOfficials, deleteOfficial } from "../api/userData"; // Import the API calls
+import { getDashboardEntities, getUserLeagues, deleteLeague, getUserTeams, deleteTeam, getUserOfficials, deleteOfficial } from "../api/userData"; // Import the necessary functions
 
-// Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    leagues: [],
+    teams: [],
+    officials: [],
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const [message, setMessage] = useState(null);
@@ -27,6 +31,10 @@ const Dashboard = () => {
       setUser(user);
       if (!user) {
         navigate("/login"); // Redirect to login if user is not logged in
+      } else {
+        // Fetch dashboard data after user is authenticated
+        const data = await getDashboardEntities(user.id);
+        setDashboardData(data);
       }
     };
 
@@ -55,31 +63,31 @@ const Dashboard = () => {
             message={message}
           />
           <UserEntities
-            user={user}
             setMessage={setMessage}
             entityType="leagues"
             entityTypeSingular="league"
-            fetchEntities={getUserLeagues}
-            deleteEntity={deleteLeague}
+            entities={dashboardData.leagues} // Pass initial leagues
+            deleteEntity={deleteLeague} // Function to delete a league
             idField="league_id"
+            fetchEntities={getUserLeagues} // Function to fetch all leagues
           />
           <UserEntities
-            user={user}
             setMessage={setMessage}
             entityType="teams"
             entityTypeSingular="team"
-            fetchEntities={getUserTeams}
-            deleteEntity={deleteTeam}
+            entities={dashboardData.teams} // Pass initial teams
+            deleteEntity={deleteTeam} // Function to delete a team
             idField="team_id"
+            fetchEntities={getUserTeams} // Function to fetch all teams
           />
           <UserEntities
-            user={user}
             setMessage={setMessage}
             entityType="officials"
             entityTypeSingular="official"
-            fetchEntities={getUserOfficials}
-            deleteEntity={deleteOfficial}
+            entities={dashboardData.officials} // Pass initial officials
+            deleteEntity={deleteOfficial} // Function to delete an official
             idField="official_id"
+            fetchEntities={getUserOfficials} // Function to fetch all officials
           />
         </div>
       ) : (

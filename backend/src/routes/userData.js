@@ -3,6 +3,11 @@ const router = express.Router();
 
 const userDataController = require("../controllers/userData");
 
+// DASHBOARD
+
+// Get 4 of each entity for the dashboard
+router.get("/dashboard", userDataController.getDashboardEntities);
+
 // LEAGUES
 
 // Get all leagues belonging to a given user

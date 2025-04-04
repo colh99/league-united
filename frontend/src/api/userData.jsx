@@ -1,7 +1,35 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
+
+// DASHBOARD
+
+// get 4 of each entity type for the dashboard
+export const getDashboardEntities = async (userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/userData/dashboard`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: userId,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Fetched dashboard data", data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching dashboard entities:", error);
+    return null;
+  }
+};
+
+
 // LEAGUES  
+
 export const getUserLeagues = async () => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));

@@ -8,6 +8,58 @@ const cleanData = (data) => {
   return cleanedData;
 };
 
+// DASHBOARD
+
+// Get 4 of each entity for the dashboard
+const getDashboardEntities = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader; // Extract user_id from the authorization header
+
+  try {
+    const leagues = await supabase
+      .from("leagues")
+      .select("*")
+      .eq("user_id", user_id)
+      .limit(4);
+
+    const teams = await supabase
+      .from("teams")
+      .select("*")
+      .eq("user_id", user_id)
+      .limit(4);
+
+    const seasons = await supabase
+      .from("seasons")
+      .select("*")
+      .eq("user_id", user_id)
+      .limit(4);
+
+    const officials = await supabase
+      .from("officials")
+      .select("*")
+      .eq("user_id", user_id)
+      .limit(4);
+
+    res.status(200).json({
+      leagues: leagues.data,
+      teams: teams.data,
+      seasons: seasons.data,
+      officials: officials.data,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard entities:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+// LEAGUES
+
 // Get all leagues belonging to a given user
 const getUserLeagues = (req, res) => {
   const authHeader = req.headers.authorization;
@@ -703,6 +755,7 @@ const deleteOfficial = (req, res) => {
 
 
 module.exports = {
+  getDashboardEntities,
   getUserLeagues,
   getLeagueById,
   createLeague,

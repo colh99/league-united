@@ -1,3 +1,4 @@
+/* Delete button */
 .delete-button {
     background-color: #e74c3c;
     color: white;
@@ -9,11 +10,13 @@
     background-color: #c0392b;
 }
 
+/* Edit button */
 .edit-button {
     height: 2.5rem;
     padding: 0 2rem;
 }
 
+/* Expanded detailed list view */
 .dashboard-entity-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -54,13 +57,53 @@
 
 .dashboard-entity-list img {
     width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-.league {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Collapsed simple list view */
+.dashboard-simple-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 10px 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Similar to roster list */
+  border-radius: 5px;
+  overflow: hidden; /* Ensures rounded corners apply to all items */
+}
+
+.dashboard-simple-list li {
+  background-color: #fff;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef; /* Divider between items */
+}
+
+.dashboard-simple-list li:last-child {
+  border-bottom: none; /* Remove border for the last item */
+}
+
+.dashboard-simple-list li:nth-child(even) {
+  background-color: #f4f4f4; /* Alternating row colors */
+}
+
+.dashboard-simple-list li a {
+  text-decoration: none;
+  color: #2c3e50; /* Dark blue color */
+  font-size: 1rem;
+  font-weight: bold;
+  flex: 2; /* Similar to roster-name */
+}
+
+.dashboard-simple-list li a:hover {
+  text-decoration: underline;
+}
+
+.dashboard-simple-list .entity-type {
+  font-size: 0.9rem;
+  color: #777; /* Lighter grey color */
+  flex: 1; /* Similar to roster-position */
+  text-align: right;
 }
