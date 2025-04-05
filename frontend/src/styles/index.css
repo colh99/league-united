@@ -310,6 +310,12 @@ button:hover {
   background-color: #1f6391; /* Darker blue on hover */
 }
 
+button:disabled {
+  background-color: #a1a1a1; /* Grey background */
+  cursor: not-allowed; /* Show a "not-allowed" cursor */
+  opacity: 0.6; /* Make it look visually disabled */
+}
+
 /* Forms */
 input,
 textarea {
@@ -396,4 +402,9 @@ button:not(.header button) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.preferred-day input[type="radio"] {
+  width: auto; /* Ensures the radio button only takes up the space it needs */
+  margin: 1rem 0.5rem 0 0;
 }

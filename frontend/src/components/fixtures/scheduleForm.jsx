@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { generateSeasonSchedule } from "../../api/userData";
 
-const ScheduleForm = ({ seasonOverview, onSubmit }) => {
+const ScheduleForm = ({ seasonOverview }) => {
   const [startDate, setStartDate] = useState(seasonOverview.start_date || "");
   const [endDate, setEndDate] = useState(seasonOverview.end_date || "");
+  const [preferredMatchDay, setPreferredMatchDay] = useState("");
   const [matchesPerTeam, setMatchesPerTeam] = useState(1);
   const [feedback, setFeedback] = useState({
     totalMatchesPerTeam: 0,
@@ -65,19 +67,39 @@ const ScheduleForm = ({ seasonOverview, onSubmit }) => {
       const totalWeeks = Math.ceil(totalDays / 7);
       const gamesPerWeek = totalMatchesPerTeam / totalWeeks;
 
+      // Calculate the number of available matchdays
+      let availableMatchdays = 0;
+      let currentDate = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate() + 1
+      ); // Ensure no time offset
+
+      for (let i = 0; i < totalDays; i++) {
+        const dayName = currentDate.toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+        if (gameDays[dayName]?.checked) {
+          availableMatchdays++;
+        }
+        currentDate.setDate(currentDate.getDate() + 1); // Increment the date by 1 day
+      }
+
       setFeedback({
         totalMatchesPerTeam: totalMatchesPerTeam,
         totalWeeks: totalWeeks,
         gamesPerWeek: parseFloat(gamesPerWeek.toFixed(2)),
+        availableMatchdays: availableMatchdays,
       });
     } else {
       setFeedback({
         totalMatchesPerTeam: 0,
         totalWeeks: 0,
         gamesPerWeek: 0,
+        availableMatchdays: 0,
       });
     }
-  }, [startDate, endDate, matchesPerTeam, seasonOverview.teams]);
+  }, [startDate, endDate, matchesPerTeam, seasonOverview.teams, gameDays]);
 
   const handleDayChange = (day) => {
     setGameDays((prev) => ({
@@ -96,23 +118,41 @@ const ScheduleForm = ({ seasonOverview, onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
+  
     const selectedDays = Object.entries(gameDays)
-      .filter(([, value]) => value.checked) // Removed unused '_'
+      .filter(([, value]) => value.checked)
       .map(([day, value]) => ({
         day,
         times: Object.entries(value.times)
-          .filter(([, isChecked]) => isChecked) // Removed unused '_'
+          .filter(([, isChecked]) => isChecked)
           .map(([time]) => time),
       }));
-    onSubmit({
+  
+    const teamIds = seasonOverview.teams.map((team) => team.team_id);
+  
+    const scheduleData = {
       seasonId: seasonOverview.season_id,
       start_date: startDate,
       end_date: endDate,
       matches_per_team: matchesPerTeam,
       game_days: selectedDays,
-    });
+      preferred_match_day: preferredMatchDay,
+      team_ids: teamIds,
+    };
+  
+    // Log the input data
+    console.log("Schedule data to be submitted:", scheduleData);
+  
+    try {
+      const response = await generateSeasonSchedule(scheduleData);
+      console.log("Schedule generated successfully:", response);
+      alert("Schedule generated successfully!");
+    } catch (error) {
+      console.error("Error generating schedule:", error);
+      alert(`Error: ${error.message || "Failed to generate schedule"}`);
+    }
   };
 
   return (
@@ -147,18 +187,6 @@ const ScheduleForm = ({ seasonOverview, onSubmit }) => {
             required
           />
         </label>
-        <div className="schedule-feedback">
-          <p>
-            There are <strong>{seasonOverview.teams.length}</strong> teams set
-            to participate.
-          </p>
-          <p>
-            Each team would play <strong>{feedback.totalMatchesPerTeam}</strong>{" "}
-            matches total in a span of <strong>{feedback.totalWeeks}</strong>{" "}
-            weeks, with <strong>{feedback.gamesPerWeek}</strong> matches per
-            week.
-          </p>
-        </div>
         <fieldset>
           <legend>Select Game Days and Times:</legend>
           {Object.keys(gameDays).map((day) => (
@@ -185,10 +213,54 @@ const ScheduleForm = ({ seasonOverview, onSubmit }) => {
                   ))}
                 </div>
               )}
+              {gameDays[day].checked && (
+                <div className="preferred-day">
+                  <label>
+                    <input
+                      type="radio"
+                      name="preferredMatchDay"
+                      value={day}
+                      checked={preferredMatchDay === day}
+                      onChange={() => setPreferredMatchDay(day)}
+                    />
+                    Preferred Weekly Match Day
+                  </label>
+                </div>
+              )}
             </div>
           ))}
         </fieldset>
-        <button type="submit">Generate Schedule</button>
+        <div className="schedule-feedback">
+          <h4>Schedule Feedback</h4>
+          <p>
+            There are <strong>{seasonOverview.teams.length} teams</strong> set
+            to participate.
+          </p>
+          <p>
+            Each team would play{" "}
+            <strong>{feedback.totalMatchesPerTeam} matches</strong> total in a
+            span of <strong>{feedback.totalWeeks} weeks</strong>, with{" "}
+            <strong>{feedback.gamesPerWeek} matches per week.</strong>
+          </p>
+          <p>
+            There are{" "}
+            <strong>{feedback.availableMatchdays} available matchdays</strong>{" "}
+            between the selected start and end dates.
+          </p>
+          {feedback.availableMatchdays < feedback.totalMatchesPerTeam && (
+            <p style={{ color: "red", fontWeight: "bold" }}>
+              Not enough matchdays to schedule all matches (
+              {feedback.totalMatchesPerTeam} matchdays required, only{" "}
+              {feedback.availableMatchdays} matchdays available).
+            </p>
+          )}
+        </div>
+        <button
+          type="submit"
+          disabled={feedback.availableMatchdays < feedback.totalMatchesPerTeam}
+        >
+          Generate Schedule
+        </button>
       </form>
     </div>
   );
@@ -208,7 +280,6 @@ ScheduleForm.propTypes = {
       })
     ).isRequired,
   }).isRequired,
-  onSubmit: PropTypes.func.isRequired,
 };
 
 export default ScheduleForm;

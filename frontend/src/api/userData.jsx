@@ -588,3 +588,45 @@ export const deleteOfficial = async (officialId) => {
     console.error("Error deleting official:", error);
   }
 };
+
+
+// MATCHES and SCHEDULE
+
+export const generateSeasonSchedule = async (scheduleData) => {
+  try {
+    // Retrieve the user from local storage
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    // Make the API request
+    const response = await fetch(
+      `${API_BASE_URL}/userData/matches/generateSchedule`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId, // Pass the user ID in the Authorization header
+        },
+        body: JSON.stringify(scheduleData), // Send the schedule data in the request body
+      }
+    );
+
+    // Check if the response is successful
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to generate schedule");
+    }
+
+    // Parse and return the response data
+    const data = await response.json();
+    console.log("Generated schedule data:", data);
+    return data;
+  } catch (error) {
+    console.error("Error generating schedule:", error);
+    throw error; // Re-throw the error for the caller to handle
+  }
+};

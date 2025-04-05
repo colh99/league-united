@@ -57,7 +57,6 @@ const getDashboardEntities = async (req, res) => {
   }
 };
 
-
 // LEAGUES
 
 // Get all leagues belonging to a given user
@@ -210,7 +209,6 @@ const deleteLeague = (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     });
 };
-
 
 // TEAMS
 
@@ -413,7 +411,10 @@ const updateTeam = async (req, res) => {
       return res.status(400).json({ error: joinTableError.message });
     }
 
-    console.log("Team, manager, and venue updated successfully:", teamResult[0]);
+    console.log(
+      "Team, manager, and venue updated successfully:",
+      teamResult[0]
+    );
     res.status(200).json(teamResult[0]);
   } catch (err) {
     console.error("Unexpected error:", err);
@@ -455,7 +456,6 @@ const deleteTeam = (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     });
 };
-
 
 // SEASONS
 
@@ -611,7 +611,10 @@ const updateSeason = async (req, res) => {
         .eq("user_id", user_id); // Ensure the user_id matches
 
       if (deleteError) {
-        console.log("Error deleting from seasons_teams join table:", deleteError);
+        console.log(
+          "Error deleting from seasons_teams join table:",
+          deleteError
+        );
         return res.status(400).json({ error: deleteError.message });
       }
 
@@ -669,7 +672,10 @@ const deleteSeason = async (req, res) => {
       .eq("season_id", seasonId);
 
     if (joinTableError) {
-      console.log("Error deleting from seasons_teams join table:", joinTableError);
+      console.log(
+        "Error deleting from seasons_teams join table:",
+        joinTableError
+      );
       return res.status(400).json({ error: joinTableError.message });
     }
 
@@ -680,7 +686,6 @@ const deleteSeason = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 // OFFICIALS
 
@@ -844,6 +849,207 @@ const deleteOfficial = (req, res) => {
     });
 };
 
+// MATCHES and SCHEDULE
+
+// Create a full season schedule
+const generateSeasonSchedule = async (req, res) => {
+  try {
+    console.log("Request received to generate season schedule:", req.body);
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      console.log("No authorization header found");
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const user_id = authHeader;
+
+    const {
+      seasonId,
+      start_date,
+      end_date,
+      matches_per_team,
+      game_days,
+      preferred_match_day,
+      team_ids,
+    } = req.body;
+
+    // Validate input
+    if (
+      !seasonId ||
+      !start_date ||
+      !end_date ||
+      !matches_per_team ||
+      !team_ids ||
+      team_ids.length < 2
+    ) {
+      console.log("Invalid input data:", req.body);
+      return res.status(400).json({ error: "Invalid input data" });
+    }
+
+    console.log("Validated input data. Proceeding to fetch venues...");
+
+    // Update the season's start and end dates
+    const { error: updateSeasonError } = await supabase
+      .from("seasons")
+      .update({ start_date, end_date })
+      .eq("season_id", seasonId);
+
+    if (updateSeasonError) {
+      console.error("Error updating season dates:", updateSeasonError);
+      return res.status(400).json({ error: "Failed to update season dates" });
+    }
+
+    console.log("Season dates updated successfully:", { start_date, end_date });
+
+    // Fetch primary venues for each team
+    const { data: venues, error: venueError } = await supabase
+      .from("teams_venues")
+      .select("team_id, venue_id")
+      .eq("is_primary", true)
+      .in("team_id", team_ids);
+
+    if (venueError) {
+      console.error("Error fetching venues:", venueError);
+      return res.status(400).json({ error: "Failed to fetch venues" });
+    }
+
+    console.log("Fetched venues:", venues);
+
+    const venueMap = {};
+    venues.forEach((venue) => {
+      venueMap[venue.team_id] = venue.venue_id;
+    });
+
+    console.log("Mapped venues to teams:", venueMap);
+
+    // Generate match schedule
+    const matches = [];
+    const startDate = new Date(start_date);
+    const endDate = new Date(end_date);
+    const totalDays = (endDate - startDate) / (24 * 60 * 60 * 1000) + 1;
+
+    console.log(
+      "Start date:",
+      startDate,
+      "End date:",
+      endDate,
+      "Total days:",
+      totalDays
+    );
+
+    // Filter game days to include only selected days
+    const selectedDays = game_days.map((day) => day.day);
+    console.log("Selected game days:", selectedDays);
+
+    // Generate round-robin matches with bye weeks for odd number of teams
+    if (team_ids.length % 2 !== 0) {
+      team_ids.push(null); // Add a "bye" placeholder if the number of teams is odd
+    }
+
+    const totalRounds = team_ids.length - 1; // Number of rounds needed
+    const half = Math.floor(team_ids.length / 2);
+
+    for (let round = 0; round < totalRounds; round++) {
+      for (let i = 0; i < half; i++) {
+        const home = team_ids[i];
+        const away = team_ids[team_ids.length - 1 - i];
+
+        if (home !== null && away !== null) {
+          matches.push({
+            home_team_id: home,
+            away_team_id: away,
+            venue_id: venueMap[home], // Use home team's primary venue
+          });
+        }
+      }
+
+      // Rotate the teams for the next round (except the first team)
+      team_ids.splice(1, 0, team_ids.pop());
+    }
+
+    console.log("Generated matches with bye weeks:", matches);
+
+    // Assign match dates
+    let currentDate = new Date(start_date);
+    let matchIndex = 0;
+
+    while (currentDate <= endDate && matchIndex < matches.length) {
+      const dayName = currentDate.toLocaleDateString("en-US", {
+        weekday: "long",
+      });
+
+      if (selectedDays.includes(dayName)) {
+        const teamsPlayedToday = new Set(); // Track teams that have already played today
+        let matchesScheduledToday = false;
+
+        // Attempt to schedule matches for the current day
+        for (let i = matchIndex; i < matches.length; i++) {
+          const match = matches[i];
+
+          // Check if either team has already played today
+          if (
+            teamsPlayedToday.has(match.home_team_id) ||
+            teamsPlayedToday.has(match.away_team_id)
+          ) {
+            continue; // Skip this match and try the next one
+          }
+
+          // Assign match date and update tracking
+          match.match_date = currentDate.toISOString();
+          match.season_id = seasonId;
+          match.user_id = user_id;
+          teamsPlayedToday.add(match.home_team_id);
+          teamsPlayedToday.add(match.away_team_id);
+
+          matchIndex++; // Move to the next match
+          matchesScheduledToday = true; // Indicate that at least one match was scheduled today
+        }
+
+        // If no matches were scheduled today, break out of the loop for this day
+        if (!matchesScheduledToday) {
+          console.log(`No matches could be scheduled on ${dayName}`);
+        }
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+
+    console.log("Assigned match dates. Total matches scheduled:", matchIndex);
+
+    // Check if all matches were scheduled
+    if (matchIndex < matches.length) {
+      console.log(
+        "Not enough matchdays to schedule all matches. Matches left:",
+        matches.length - matchIndex
+      );
+      return res
+        .status(400)
+        .json({ error: "Not enough matchdays to schedule all matches" });
+    }
+
+    console.log("Inserting matches into the database...");
+
+    // Insert matches into the database
+    const { error: insertError } = await supabase
+      .from("matches")
+      .insert(matches);
+
+    if (insertError) {
+      console.error("Error inserting matches:", insertError);
+      return res.status(400).json({ error: "Failed to insert matches" });
+    }
+
+    console.log("Matches inserted successfully:", matches);
+
+    res
+      .status(201)
+      .json({ message: "Schedule generated successfully", matches });
+  } catch (error) {
+    console.error("Error generating schedule:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 module.exports = {
   getDashboardEntities,
@@ -866,4 +1072,5 @@ module.exports = {
   createOfficial,
   updateOfficial,
   deleteOfficial,
+  generateSeasonSchedule,
 };
