@@ -24,7 +24,6 @@ const SeasonForm = ({ initialData, additionalData, onSubmit }) => {
           : []
       );
     }
-
   }, [initialData]);
 
   const handleSubmit = (e) => {
@@ -45,38 +44,44 @@ const SeasonForm = ({ initialData, additionalData, onSubmit }) => {
   }));
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Start Date:
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          required
-        />
-      </label>
-      <label>
-        End Date:
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          required
-        />
-      </label>
-      <label>
-        Select Teams:
-        <Select
-          isMulti
-          options={teamOptions}
-          value={teamOptions.filter((option) => selectedTeams.includes(option.value))} // Auto-select teams
-          onChange={(selectedOptions) =>
-            setSelectedTeams(selectedOptions.map((option) => option.value))
-          }
-        />
-      </label>
-      <button type="submit" id="seasonForm-button">Submit</button>
-    </form>
+    <div className="component-container">
+      <form onSubmit={handleSubmit}>
+        <label>
+          Start Date:
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            required
+          />
+        </label>
+        <label>
+          End Date:
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            required
+          />
+        </label>
+        <label>
+          Select Teams:
+          <Select
+            isMulti
+            options={teamOptions}
+            value={teamOptions.filter((option) =>
+              selectedTeams.includes(option.value)
+            )} // Auto-select teams
+            onChange={(selectedOptions) =>
+              setSelectedTeams(selectedOptions.map((option) => option.value))
+            }
+          />
+        </label>
+        <button type="submit" id="seasonForm-button">
+          Submit
+        </button>
+      </form>
+    </div>
   );
 };
 

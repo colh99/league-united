@@ -344,6 +344,17 @@ select:focus {
   outline: none;
 }
 
+fieldset {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 2rem;
+}
+legend {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
 #seasonForm-button {
   margin-top: 1rem;
 }

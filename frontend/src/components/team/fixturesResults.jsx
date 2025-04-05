@@ -5,7 +5,7 @@ const PreviousMatches = ({ matches, reports, teamId }) => {
   return (
     <div className="component-container">
       <Link to={`/fixtures/team/${teamId}`} className="matches-header">
-        <h3 className="matches-title">Previous Results</h3>
+        <h3 className="matches-title">Fixtures and Results</h3>
         <p>View team schedule</p>
       </Link>
       {matches.length > 0 ? (

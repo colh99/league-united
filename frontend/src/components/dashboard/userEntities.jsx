@@ -60,7 +60,7 @@ const UserEntities = ({ setMessage, entityType, entityTypeSingular, entities, de
         <h2 className="entity-header">
           Your {entityType.charAt(0).toUpperCase() + entityType.slice(1)}
         </h2>
-        <button className="expand-button">{isExpanded ? "Collapse" : "View All"}</button>
+        <button className="expand-button">{isExpanded ? "Collapse" : "View All and Edit"}</button>
       </div>
       {loading ? (
         <p>Loading...</p>

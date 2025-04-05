@@ -261,7 +261,7 @@ const getTeamById = (req, res) => {
 };
 
 // Create a new team
-const createTeam = (req, res) => {
+const createTeam = async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     console.log("No authorization header found");
@@ -269,33 +269,80 @@ const createTeam = (req, res) => {
   }
 
   const user_id = authHeader;
-  const teamData = req.body;
+  const { manager, venue, ...teamData } = req.body;
   teamData.user_id = user_id;
 
-  supabase
-    .from("teams")
-    .insert(teamData)
-    .select() // Specify that we want the inserted data to be returned
-    .then(({ data, error }) => {
-      if (error) {
-        console.log("Error creating team:", error);
-        res.status(400).json({ error: error.message });
-      } else if (!data || data.length === 0) {
-        console.log("No data returned from insert operation");
-        res.status(400).json({ error: "Failed to create team" });
-      } else {
-        console.log("Team created successfully:", data);
-        res.status(201).json(data[0]);
-      }
-    })
-    .catch((err) => {
-      console.error("Unexpected error:", err);
-      res.status(500).json({ error: "Internal server error" });
-    });
+  try {
+    // Insert the team into the teams table
+    const { data: teamResult, error: teamError } = await supabase
+      .from("teams")
+      .insert(teamData)
+      .select();
+
+    if (teamError) {
+      console.log("Error creating team:", teamError);
+      return res.status(400).json({ error: teamError.message });
+    }
+
+    if (!teamResult || teamResult.length === 0) {
+      console.log("No data returned from team insert operation");
+      return res.status(400).json({ error: "Failed to create team" });
+    }
+
+    const createdTeam = teamResult[0];
+    const team_id = createdTeam.team_id;
+
+    // Insert the manager into the managers table
+    const managerData = { ...manager, team_id, user_id };
+    const { error: managerError } = await supabase
+      .from("managers")
+      .insert(managerData);
+
+    if (managerError) {
+      console.log("Error creating manager:", managerError);
+      return res.status(400).json({ error: managerError.message });
+    }
+
+    // Insert the venue into the venues table
+    const venueData = { ...venue, user_id };
+    const { data: venueResult, error: venueError } = await supabase
+      .from("venues")
+      .insert(venueData)
+      .select();
+
+    if (venueError) {
+      console.log("Error creating venue:", venueError);
+      return res.status(400).json({ error: venueError.message });
+    }
+
+    if (!venueResult || venueResult.length === 0) {
+      console.log("No data returned from venue insert operation");
+      return res.status(400).json({ error: "Failed to create venue" });
+    }
+
+    const venue_id = venueResult[0].venue_id;
+
+    // Link the venue to the team in the teams_venues join table
+    const teamsVenuesData = { team_id, venue_id, is_primary: true, user_id };
+    const { error: joinTableError } = await supabase
+      .from("teams_venues")
+      .insert(teamsVenuesData);
+
+    if (joinTableError) {
+      console.log("Error linking team to venue:", joinTableError);
+      return res.status(400).json({ error: joinTableError.message });
+    }
+
+    console.log("Team, manager, and venue created successfully:", createdTeam);
+    res.status(201).json(createdTeam);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 // Update a team
-const updateTeam = (req, res) => {
+const updateTeam = async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     console.log("No authorization header found");
@@ -303,31 +350,75 @@ const updateTeam = (req, res) => {
   }
 
   const user_id = authHeader;
-  const teamId = req.params.id;
-  const teamData = req.body;
+  const team_id = req.params.id;
+  const { manager, venue, ...teamData } = req.body;
 
-  supabase
-    .from("teams")
-    .update(teamData)
-    .select("*")
-    .eq("team_id", teamId)
-    .eq("user_id", user_id)
-    .then(({ data, error }) => {
-      if (error) {
-        console.log("Error updating team:", error);
-        res.status(400).json({ error: error.message });
-      } else if (!data || data.length === 0) {
-        console.log("No data returned from update operation");
-        res.status(404).json({ error: "Team not found" });
-      } else {
-        console.log("Team updated successfully:", data);
-        res.status(200).json(data[0]);
-      }
-    })
-    .catch((err) => {
-      console.error("Unexpected error:", err);
-      res.status(500).json({ error: "Internal server error" });
-    });
+  try {
+    // Update the team in the teams table
+    const { data: teamResult, error: teamError } = await supabase
+      .from("teams")
+      .update(teamData)
+      .select("*")
+      .eq("team_id", team_id)
+      .eq("user_id", user_id);
+
+    if (teamError) {
+      console.log("Error updating team:", teamError);
+      return res.status(400).json({ error: teamError.message });
+    }
+
+    if (!teamResult || teamResult.length === 0) {
+      console.log("No data returned from team update operation");
+      return res.status(404).json({ error: "Team not found" });
+    }
+
+    // Update the manager in the managers table
+    const managerData = { ...manager, user_id };
+    const { error: managerError } = await supabase
+      .from("managers")
+      .upsert({ ...managerData, team_id }, { onConflict: ["team_id"] });
+
+    if (managerError) {
+      console.log("Error updating manager:", managerError);
+      return res.status(400).json({ error: managerError.message });
+    }
+
+    // Update the venue in the venues table
+    const venueData = { ...venue, user_id };
+    const { data: venueResult, error: venueError } = await supabase
+      .from("venues")
+      .upsert(venueData, { onConflict: ["venue_id"] })
+      .select();
+
+    if (venueError) {
+      console.log("Error updating venue:", venueError);
+      return res.status(400).json({ error: venueError.message });
+    }
+
+    if (!venueResult || venueResult.length === 0) {
+      console.log("No data returned from venue update operation");
+      return res.status(400).json({ error: "Failed to update venue" });
+    }
+
+    const venue_id = venueResult[0].venue_id;
+
+    // Ensure the venue is linked to the team in the teams_venues join table
+    const teamsVenuesData = { team_id, venue_id, is_primary: true, user_id };
+    const { error: joinTableError } = await supabase
+      .from("teams_venues")
+      .upsert(teamsVenuesData, { onConflict: ["team_id", "venue_id"] });
+
+    if (joinTableError) {
+      console.log("Error linking team to venue:", joinTableError);
+      return res.status(400).json({ error: joinTableError.message });
+    }
+
+    console.log("Team, manager, and venue updated successfully:", teamResult[0]);
+    res.status(200).json(teamResult[0]);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 // Delete a team

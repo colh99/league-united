@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { getTeamById } from "../api/teams.jsx";
 import TeamDetails from "../components/team/teamDetails";
 import Roster from "../components/team/roster";
-import PreviousMatches from "../components/team/previousMatches.jsx";
+import FixturesResults from "../components/team/fixturesResults.jsx";
 import "../styles/team.css";
 
 function TeamPage() {
@@ -30,7 +30,7 @@ function TeamPage() {
       <Header />
         <div className="container">
               <TeamDetails team={team.team} manager={team.manager} venue={team.primaryVenue} />
-              <PreviousMatches matches={team.previousMatches} teamId={team_id} reports={team.match_reports} />
+              <FixturesResults matches={team.previousMatches} teamId={team_id} reports={team.match_reports} />
               <Roster roster={team.roster} />
             </div>
       <Footer />
