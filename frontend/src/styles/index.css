@@ -362,3 +362,38 @@ legend {
 button:not(.header button) {
   margin: 0 1rem 1rem 0;
 }
+
+.day-label input[type="checkbox"],
+.time-label input[type="checkbox"] {
+  width: auto; /* Ensures the checkbox only takes up the space it needs */
+  margin: 0; /* Removes any default margin */
+  padding: 0; /* Removes any default padding */
+  display: inline-block; /* Ensures proper alignment */
+}
+
+.day-selection {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.day-label {
+  font-weight: bold;
+  display: flex;
+  align-items: center; /* Aligns the checkbox and label vertically */
+  gap: 0.5rem; /* Adds spacing between the checkbox and label text */
+  justify-content: flex-start; /* Ensures alignment to the left */
+}
+
+.time-options {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1.5rem;
+}
+
+.time-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
