@@ -630,3 +630,32 @@ export const generateSeasonSchedule = async (scheduleData) => {
     throw error; // Re-throw the error for the caller to handle
   }
 };
+
+export const clearSeasonSchedule = async (seasonId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/userData/matches/clearSchedule/${seasonId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    console.log("Cleared schedule for season with ID", seasonId);
+  } catch (error) {
+    console.error("Error clearing schedule:", error);
+  }
+};

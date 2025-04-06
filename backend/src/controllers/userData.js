@@ -927,6 +927,7 @@ const generateSeasonSchedule = async (req, res) => {
     const matches = [];
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
+    endDate.setDate(endDate.getDate() + 1); // Add 1 day to include the end date
     const totalDays = (endDate - startDate) / (24 * 60 * 60 * 1000) + 1;
 
     console.log(
@@ -970,7 +971,14 @@ const generateSeasonSchedule = async (req, res) => {
 
     console.log("Generated matches with bye weeks:", matches);
 
-    // Assign match dates
+    const timeSlotMapping = {
+      morning: "10:00:00", // 10 AM
+      afternoon: "13:00:00", // 1 PM
+      evening: "18:00:00", // 6 PM
+      default: "17:00:00", // 5 PM
+    };
+
+    // Assign match dates and times
     let currentDate = new Date(start_date);
     let matchIndex = 0;
 
@@ -980,42 +988,52 @@ const generateSeasonSchedule = async (req, res) => {
       });
 
       if (selectedDays.includes(dayName)) {
-        const teamsPlayedToday = new Set(); // Track teams that have already played today
-        let matchesScheduledToday = false;
+        const availableTimes =
+          game_days.find((day) => day.day === dayName)?.times || [];
+        const timesToUse =
+          availableTimes.length > 0 ? availableTimes : ["default"]; // Use "default" if no times are provided
 
-        // Attempt to schedule matches for the current day
-        for (let i = matchIndex; i < matches.length; i++) {
-          const match = matches[i];
+        const scheduledTeams = new Set(); // Track teams already scheduled on this date
 
-          // Check if either team has already played today
+        while (matchIndex < matches.length) {
+          const match = matches[matchIndex];
+          const { home_team_id, away_team_id } = match;
+
+          // Skip if either team already scheduled today
           if (
-            teamsPlayedToday.has(match.home_team_id) ||
-            teamsPlayedToday.has(match.away_team_id)
+            scheduledTeams.has(home_team_id) ||
+            scheduledTeams.has(away_team_id)
           ) {
-            continue; // Skip this match and try the next one
+            break; // Stop trying to schedule today — move to next date
           }
 
-          // Assign match date and update tracking
-          match.match_date = currentDate.toISOString();
+          const matchDate = currentDate.toLocaleDateString("en-CA");
+          const availableTimes =
+            game_days.find((day) => day.day === dayName)?.times || [];
+          const timesToUse =
+            availableTimes.length > 0 ? availableTimes : ["default"];
+          const matchTime = timeSlotMapping[timesToUse[0]]; // Just use first time slot
+
+          match.match_date = `${matchDate}T${matchTime}`;
           match.season_id = seasonId;
           match.user_id = user_id;
-          teamsPlayedToday.add(match.home_team_id);
-          teamsPlayedToday.add(match.away_team_id);
 
-          matchIndex++; // Move to the next match
-          matchesScheduledToday = true; // Indicate that at least one match was scheduled today
-        }
+          scheduledTeams.add(home_team_id);
+          scheduledTeams.add(away_team_id);
 
-        // If no matches were scheduled today, break out of the loop for this day
-        if (!matchesScheduledToday) {
-          console.log(`No matches could be scheduled on ${dayName}`);
+          matchIndex++;
         }
       }
 
-      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+      // Move to the next day
+      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
     }
 
-    console.log("Assigned match dates. Total matches scheduled:", matchIndex);
+    console.log(
+      "Assigned match dates and times. Total matches scheduled:",
+      matchIndex
+    );
 
     // Check if all matches were scheduled
     if (matchIndex < matches.length) {
@@ -1051,6 +1069,30 @@ const generateSeasonSchedule = async (req, res) => {
   }
 };
 
+// Clear the season schedule
+const clearSeasonSchedule = async (req, res) => {
+  const { seasonId } = req.params;
+
+  try {
+    // Delete matches associated with the given season
+    const { error: deleteError } = await supabase
+      .from("matches")
+      .delete()
+      .eq("season_id", seasonId);
+
+    if (deleteError) {
+      console.error("Error deleting matches:", deleteError);
+      return res.status(400).json({ error: "Failed to delete matches" });
+    }
+
+    console.log("Matches deleted successfully for season:", seasonId);
+    res.status(200).json({ message: "Schedule cleared successfully" });
+  } catch (error) {
+    console.error("Error clearing schedule:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   getDashboardEntities,
   getUserLeagues,
@@ -1073,4 +1115,5 @@ module.exports = {
   updateOfficial,
   deleteOfficial,
   generateSeasonSchedule,
+  clearSeasonSchedule,
 };

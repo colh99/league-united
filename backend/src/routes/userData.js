@@ -81,4 +81,7 @@ router.delete("/officials/:id", userDataController.deleteOfficial);
 // Create a full season schedule
 router.post("/matches/generateSchedule", userDataController.generateSeasonSchedule);
 
+// Clear a full season schedule
+router.delete("/matches/clearSchedule/:seasonId", userDataController.clearSeasonSchedule);
+
 module.exports = router;

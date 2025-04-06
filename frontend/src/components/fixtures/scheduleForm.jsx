@@ -48,7 +48,7 @@ const ScheduleForm = ({ seasonOverview }) => {
     });
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     if (
       startDate &&
       endDate &&
@@ -59,22 +59,21 @@ const ScheduleForm = ({ seasonOverview }) => {
       const end = new Date(endDate);
       const totalDays = (end - start) / (24 * 60 * 60 * 1000) + 1; // Include both start and end
       const numberOfTeams = seasonOverview.teams.length;
-
+  
       // Calculate the number of matches a team plays in a season
       const totalMatchesPerTeam = matchesPerTeam * (numberOfTeams - 1);
-
-      // Calculate the average number of games per week
-      const totalWeeks = Math.ceil(totalDays / 7);
-      const gamesPerWeek = totalMatchesPerTeam / totalWeeks;
-
+  
+      // Calculate the required matchdays
+      const requiredMatchdays =
+        totalMatchesPerTeam + (numberOfTeams % 2 !== 0 ? 1 : 0); // Add 1 if odd number of teams
+  
       // Calculate the number of available matchdays
       let availableMatchdays = 0;
       let currentDate = new Date(
         start.getFullYear(),
         start.getMonth(),
-        start.getDate() + 1
-      ); // Ensure no time offset
-
+        start.getDate() + 1 // Ensure no time offset
+      ); 
       for (let i = 0; i < totalDays; i++) {
         const dayName = currentDate.toLocaleDateString("en-US", {
           weekday: "long",
@@ -84,18 +83,16 @@ const ScheduleForm = ({ seasonOverview }) => {
         }
         currentDate.setDate(currentDate.getDate() + 1); // Increment the date by 1 day
       }
-
+  
       setFeedback({
         totalMatchesPerTeam: totalMatchesPerTeam,
-        totalWeeks: totalWeeks,
-        gamesPerWeek: parseFloat(gamesPerWeek.toFixed(2)),
+        requiredMatchdays: requiredMatchdays,
         availableMatchdays: availableMatchdays,
       });
     } else {
       setFeedback({
         totalMatchesPerTeam: 0,
-        totalWeeks: 0,
-        gamesPerWeek: 0,
+        requiredMatchdays: 0,
         availableMatchdays: 0,
       });
     }
@@ -118,9 +115,9 @@ const ScheduleForm = ({ seasonOverview }) => {
     }));
   };
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const selectedDays = Object.entries(gameDays)
       .filter(([, value]) => value.checked)
       .map(([day, value]) => ({
@@ -129,9 +126,9 @@ const ScheduleForm = ({ seasonOverview }) => {
           .filter(([, isChecked]) => isChecked)
           .map(([time]) => time),
       }));
-  
+
     const teamIds = seasonOverview.teams.map((team) => team.team_id);
-  
+
     const scheduleData = {
       seasonId: seasonOverview.season_id,
       start_date: startDate,
@@ -141,14 +138,15 @@ const ScheduleForm = ({ seasonOverview }) => {
       preferred_match_day: preferredMatchDay,
       team_ids: teamIds,
     };
-  
+
     // Log the input data
     console.log("Schedule data to be submitted:", scheduleData);
-  
+
     try {
       const response = await generateSeasonSchedule(scheduleData);
       console.log("Schedule generated successfully:", response);
       alert("Schedule generated successfully!");
+      window.location.reload(); // Reload the page after successful generation
     } catch (error) {
       console.error("Error generating schedule:", error);
       alert(`Error: ${error.message || "Failed to generate schedule"}`);
@@ -247,10 +245,14 @@ const ScheduleForm = ({ seasonOverview }) => {
             <strong>{feedback.availableMatchdays} available matchdays</strong>{" "}
             between the selected start and end dates.
           </p>
-          {feedback.availableMatchdays < feedback.totalMatchesPerTeam && (
+          <p>
+            <strong>{feedback.requiredMatchdays} matchdays</strong> are required
+            to schedule all matches.
+          </p>
+          {feedback.availableMatchdays < feedback.requiredMatchdays && (
             <p style={{ color: "red", fontWeight: "bold" }}>
               Not enough matchdays to schedule all matches (
-              {feedback.totalMatchesPerTeam} matchdays required, only{" "}
+              {feedback.requiredMatchdays} matchdays required, only{" "}
               {feedback.availableMatchdays} matchdays available).
             </p>
           )}

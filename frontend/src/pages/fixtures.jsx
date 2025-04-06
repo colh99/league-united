@@ -7,6 +7,7 @@ import FixturesList from "../components/fixtures/fixturesList";
 import ScheduleForm from "../components/fixtures/scheduleForm"; // Import the form component
 import { getTeamById } from "../api/teams";
 import { getSeasonOverview } from "../api/leagues";
+import { clearSeasonSchedule } from "../api/userData"; // Import the API function to clear the schedule
 
 function FixturesPage() {
   const { seasonId, teamId } = useParams();
@@ -54,6 +55,19 @@ function FixturesPage() {
     setShowScheduleForm((prev) => !prev); // Toggle the form visibility
   };
 
+  const handleClearScheduleClick = () => {
+    if (window.confirm("Are you sure you want to clear the schedule? This action cannot be undone.")) {
+      clearSeasonSchedule(seasonId)
+        .then(() => {
+          alert("Schedule cleared successfully!");
+          window.location.reload(); // Reload the page after successful clearing
+        })
+        .catch((error) => {
+          console.error("Error clearing schedule:", error);
+          alert("Failed to clear schedule. Please try again.");
+        });
+    }
+  };
   return (
     <div>
       <Header />
@@ -61,13 +75,18 @@ function FixturesPage() {
         <h1>Fixtures</h1>
         <h2>{header}</h2>
         {!isTeamPage && isOwner && (
-          <div className="create-schedule-button">
-            <button onClick={handleGenerateScheduleClick}>
-              {showScheduleForm
-                ? "Hide Schedule Form"
-                : "Generate Season Schedule"}
-            </button>
-          </div>
+          <>
+            <div>
+              <button onClick={handleGenerateScheduleClick}>
+                {showScheduleForm
+                  ? "Hide Schedule Form"
+                  : "Generate Season Schedule"}
+              </button>
+              <button onClick={handleClearScheduleClick} className="delete-button">
+                Clear Schedule
+              </button>
+            </div>
+          </>
         )}
         {showScheduleForm && seasonOverview && (
           <ScheduleForm
