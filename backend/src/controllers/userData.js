@@ -947,29 +947,52 @@ const generateSeasonSchedule = async (req, res) => {
     if (team_ids.length % 2 !== 0) {
       team_ids.push(null); // Add a "bye" placeholder if the number of teams is odd
     }
-
-    const totalRounds = team_ids.length - 1; // Number of rounds needed
+    
+    const totalRounds = (team_ids.length - 1) * matches_per_team; // Adjust total rounds based on matches_per_team
     const half = Math.floor(team_ids.length / 2);
-
+    
+    // Balance home and away games for each team
+    const homeAwayCount = {}; // Track home/away counts for each team
+    
+    // Initialize home/away counts for all teams
+    team_ids.forEach((team) => {
+      if (team !== null) {
+        homeAwayCount[team] = { home: 0, away: 0 };
+      }
+    });
+    
     for (let round = 0; round < totalRounds; round++) {
       for (let i = 0; i < half; i++) {
         const home = team_ids[i];
         const away = team_ids[team_ids.length - 1 - i];
-
+    
         if (home !== null && away !== null) {
-          matches.push({
-            home_team_id: home,
-            away_team_id: away,
-            venue_id: venueMap[home], // Use home team's primary venue
-          });
+          // Assign home/away based on current counts to balance matches
+          if (homeAwayCount[home].home <= homeAwayCount[home].away) {
+            matches.push({
+              home_team_id: home,
+              away_team_id: away,
+              venue_id: venueMap[home], // Use home team's primary venue
+            });
+            homeAwayCount[home].home++;
+            homeAwayCount[away].away++;
+          } else {
+            matches.push({
+              home_team_id: away,
+              away_team_id: home,
+              venue_id: venueMap[away], // Use away team's primary venue
+            });
+            homeAwayCount[away].home++;
+            homeAwayCount[home].away++;
+          }
         }
       }
-
+    
       // Rotate the teams for the next round (except the first team)
       team_ids.splice(1, 0, team_ids.pop());
     }
-
-    console.log("Generated matches with bye weeks:", matches);
+    
+    console.log("Balanced matches with home/away distribution:", matches);
 
     const timeSlotMapping = {
       morning: "10:00:00", // 10 AM
@@ -982,12 +1005,18 @@ const generateSeasonSchedule = async (req, res) => {
     let currentDate = new Date(start_date);
     let matchIndex = 0;
 
+    // Helper function to pick a random time slot
+    const getRandomTimeSlot = (times) => {
+      return times[Math.floor(Math.random() * times.length)];
+    };
+
+    // Schedule matches on the preferred match day first
     while (currentDate <= endDate && matchIndex < matches.length) {
       const dayName = currentDate.toLocaleDateString("en-US", {
         weekday: "long",
       });
 
-      if (selectedDays.includes(dayName)) {
+      if (dayName === preferred_match_day) {
         const availableTimes =
           game_days.find((day) => day.day === dayName)?.times || [];
         const timesToUse =
@@ -1008,11 +1037,7 @@ const generateSeasonSchedule = async (req, res) => {
           }
 
           const matchDate = currentDate.toLocaleDateString("en-CA");
-          const availableTimes =
-            game_days.find((day) => day.day === dayName)?.times || [];
-          const timesToUse =
-            availableTimes.length > 0 ? availableTimes : ["default"];
-          const matchTime = timeSlotMapping[timesToUse[0]]; // Just use first time slot
+          const matchTime = timeSlotMapping[getRandomTimeSlot(timesToUse)];
 
           match.match_date = `${matchDate}T${matchTime}`;
           match.season_id = seasonId;
@@ -1027,6 +1052,85 @@ const generateSeasonSchedule = async (req, res) => {
 
       // Move to the next day
       currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
+    }
+
+    // Reset currentDate to start_date to schedule remaining matches
+    currentDate = new Date(start_date);
+
+        // Schedule remaining matches on other available match days
+    while (currentDate <= endDate && matchIndex < matches.length) {
+      // Collect all scheduled matches up to the current date
+      const scheduledDates = matches
+        .filter((match) => match.match_date)
+        .map((match) => new Date(match.match_date).getTime());
+    
+      // Find the best day to schedule the next match
+      const bestDay = selectedDays
+        .filter((day) => day !== preferred_match_day) // Exclude preferred match day
+        .map((day) => {
+          const dayIndex = selectedDays.indexOf(day);
+          const dayDate = new Date(currentDate);
+          dayDate.setDate(
+            currentDate.getDate() + dayIndex - currentDate.getDay()
+          ); // Set to the correct day of the week
+    
+          if (dayDate < currentDate || dayDate > endDate) return null; // Skip invalid dates
+    
+          const dayTime = dayDate.getTime();
+          const minDistance = scheduledDates.length
+            ? Math.min(...scheduledDates.map((date) => Math.abs(date - dayTime)))
+            : Infinity; // If no scheduled dates, distance is infinite
+    
+          return { dayDate, minDistance };
+        })
+        .filter(Boolean) // Remove null values
+        .sort((a, b) => b.minDistance - a.minDistance)[0]; // Pick the day with the largest gap
+    
+      if (!bestDay) {
+        // If no valid day is found, move to the next week
+        currentDate.setDate(currentDate.getDate() + 7 - currentDate.getDay());
+        currentDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
+        continue;
+      }
+    
+      const { dayDate } = bestDay;
+      const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" });
+    
+      const availableTimes =
+        game_days.find((gameDay) => gameDay.day === dayName)?.times || [];
+      const timesToUse =
+        availableTimes.length > 0 ? availableTimes : ["default"]; // Use "default" if no times are provided
+    
+      const scheduledTeams = new Set(); // Track teams already scheduled on this date
+    
+      while (matchIndex < matches.length) {
+        const match = matches[matchIndex];
+        const { home_team_id, away_team_id } = match;
+    
+        // Skip if either team already scheduled today
+        if (
+          scheduledTeams.has(home_team_id) ||
+          scheduledTeams.has(away_team_id)
+        ) {
+          break; // Stop trying to schedule today — move to next date
+        }
+    
+        const matchDate = dayDate.toLocaleDateString("en-CA");
+        const matchTime = timeSlotMapping[getRandomTimeSlot(timesToUse)];
+    
+        match.match_date = `${matchDate}T${matchTime}`;
+        match.season_id = seasonId;
+        match.user_id = user_id;
+    
+        scheduledTeams.add(home_team_id);
+        scheduledTeams.add(away_team_id);
+    
+        matchIndex++;
+      }
+    
+      // Move to the next week if no matches were scheduled on this day
+      currentDate.setDate(currentDate.getDate() + 7 - currentDate.getDay());
       currentDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
     }
 

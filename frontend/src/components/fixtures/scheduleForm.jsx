@@ -48,7 +48,7 @@ const ScheduleForm = ({ seasonOverview }) => {
     });
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     if (
       startDate &&
       endDate &&
@@ -59,21 +59,21 @@ const ScheduleForm = ({ seasonOverview }) => {
       const end = new Date(endDate);
       const totalDays = (end - start) / (24 * 60 * 60 * 1000) + 1; // Include both start and end
       const numberOfTeams = seasonOverview.teams.length;
-  
+
       // Calculate the number of matches a team plays in a season
       const totalMatchesPerTeam = matchesPerTeam * (numberOfTeams - 1);
-  
+
       // Calculate the required matchdays
       const requiredMatchdays =
         totalMatchesPerTeam + (numberOfTeams % 2 !== 0 ? 1 : 0); // Add 1 if odd number of teams
-  
+
       // Calculate the number of available matchdays
       let availableMatchdays = 0;
       let currentDate = new Date(
         start.getFullYear(),
         start.getMonth(),
         start.getDate() + 1 // Ensure no time offset
-      ); 
+      );
       for (let i = 0; i < totalDays; i++) {
         const dayName = currentDate.toLocaleDateString("en-US", {
           weekday: "long",
@@ -83,17 +83,27 @@ const ScheduleForm = ({ seasonOverview }) => {
         }
         currentDate.setDate(currentDate.getDate() + 1); // Increment the date by 1 day
       }
-  
+
+      // Calculate total weeks
+      const totalWeeks = Math.ceil(totalDays / 7);
+
+      // Calculate matches per week
+      const gamesPerWeek = Math.ceil(requiredMatchdays / totalWeeks);
+
       setFeedback({
         totalMatchesPerTeam: totalMatchesPerTeam,
         requiredMatchdays: requiredMatchdays,
         availableMatchdays: availableMatchdays,
+        totalWeeks: totalWeeks,
+        gamesPerWeek: gamesPerWeek,
       });
     } else {
       setFeedback({
         totalMatchesPerTeam: 0,
         requiredMatchdays: 0,
         availableMatchdays: 0,
+        totalWeeks: 0,
+        gamesPerWeek: 0,
       });
     }
   }, [startDate, endDate, matchesPerTeam, seasonOverview.teams, gameDays]);

@@ -97,12 +97,17 @@ function FixturesList({ seasonId, teamId }) {
     return calendarDays;
   };
 
-  const renderList = () => {
+    const renderList = () => {
     if (fixtures.length === 0) {
       return <div>No matches available.</div>;
     }
-
-    return fixtures.map((fixture) => {
+  
+    // Sort fixtures by match_date in ascending order
+    const sortedFixtures = [...fixtures].sort(
+      (a, b) => new Date(a.match_date) - new Date(b.match_date)
+    );
+  
+    return sortedFixtures.map((fixture) => {
       const fixtureDate = new Date(fixture.match_date);
       const dateString = fixtureDate.toLocaleDateString();
       const timeString = fixtureDate.toLocaleTimeString([], {
@@ -112,9 +117,9 @@ function FixturesList({ seasonId, teamId }) {
       const matchReport = fixture.match_report;
       const isHomeTeam = fixture.home_team.team_id === parseInt(teamId);
       const opponentTeam = isHomeTeam ? fixture.away_team.name : fixture.home_team.name;
-
+  
       console.log(`Fixture ID: ${fixture.match_id}, Home Team ID: ${fixture.home_team.team_id}, Away Team ID: ${fixture.away_team.team_id}, Team ID: ${teamId}, Is Home Team: ${isHomeTeam}`);
-
+  
       let score = teamId ? "" : "vs";
       let result = "";
       if (matchReport) {
@@ -140,9 +145,9 @@ function FixturesList({ seasonId, teamId }) {
           }
         }
       }
-
+  
       const versusSymbol = isHomeTeam ? "vs" : "@";
-
+  
       return (
         <Link key={fixture.match_id} to={`/matches/${fixture.match_id}`}>
           <div className="fixture-list-item">
