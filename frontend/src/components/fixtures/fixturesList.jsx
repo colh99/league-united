@@ -4,7 +4,7 @@ import { getMatchesBySeason, getMatchesByTeam } from "../../api/matches";
 import "../../styles/fixtures.css";
 import { Link } from "react-router-dom";
 
-function FixturesList({ seasonId, teamId }) {
+function FixturesList({ seasonId, teamId, onEditMatch, onDeleteMatch, isOwner }) {
   const [fixtures, setFixtures] = useState([]);
   const [error, setError] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -97,16 +97,16 @@ function FixturesList({ seasonId, teamId }) {
     return calendarDays;
   };
 
-    const renderList = () => {
+  const renderList = () => {
     if (fixtures.length === 0) {
       return <div>No matches available.</div>;
     }
-  
+
     // Sort fixtures by match_date in ascending order
     const sortedFixtures = [...fixtures].sort(
       (a, b) => new Date(a.match_date) - new Date(b.match_date)
     );
-  
+
     return sortedFixtures.map((fixture) => {
       const fixtureDate = new Date(fixture.match_date);
       const dateString = fixtureDate.toLocaleDateString();
@@ -116,10 +116,10 @@ function FixturesList({ seasonId, teamId }) {
       });
       const matchReport = fixture.match_report;
       const isHomeTeam = fixture.home_team.team_id === parseInt(teamId);
-      const opponentTeam = isHomeTeam ? fixture.away_team.name : fixture.home_team.name;
-  
-      console.log(`Fixture ID: ${fixture.match_id}, Home Team ID: ${fixture.home_team.team_id}, Away Team ID: ${fixture.away_team.team_id}, Team ID: ${teamId}, Is Home Team: ${isHomeTeam}`);
-  
+      const opponentTeam = isHomeTeam
+        ? fixture.away_team.name
+        : fixture.home_team.name;
+
       let score = teamId ? "" : "vs";
       let result = "";
       if (matchReport) {
@@ -127,37 +127,29 @@ function FixturesList({ seasonId, teamId }) {
         const awayScore = matchReport.away_team_score;
         if (isHomeTeam) {
           score = `${homeScore} - ${awayScore}`;
-          if (homeScore === awayScore) {
-            result = "D";
-          } else if (homeScore > awayScore) {
-            result = "W";
-          } else {
-            result = "L";
-          }
+          result =
+            homeScore === awayScore ? "D" : homeScore > awayScore ? "W" : "L";
         } else {
           score = `${awayScore} - ${homeScore}`;
-          if (awayScore === homeScore) {
-            result = "D";
-          } else if (awayScore > homeScore) {
-            result = "W";
-          } else {
-            result = "L";
-          }
+          result =
+            awayScore === homeScore ? "D" : awayScore > homeScore ? "W" : "L";
         }
       }
-  
+
       const versusSymbol = isHomeTeam ? "vs" : "@";
-  
+
       return (
-        <Link key={fixture.match_id} to={`/matches/${fixture.match_id}`}>
-          <div className="fixture-list-item">
+        <div key={fixture.match_id} className="fixture-list-item">
+          <Link to={`/matches/${fixture.match_id}`}>
             <span className="date-time">
               {dateString} {timeString}
             </span>
             <span className="teams">
               {teamId ? (
                 <>
-                  <span>{versusSymbol} {opponentTeam}</span>
+                  <span>
+                    {versusSymbol} {opponentTeam}
+                  </span>
                   <span className="score">{score}</span>
                   <span>{result}</span>
                 </>
@@ -169,8 +161,16 @@ function FixturesList({ seasonId, teamId }) {
                 </>
               )}
             </span>
-          </div>
-        </Link>
+          </Link>
+          {isOwner && (
+            <span className="fixture-actions">
+              <button onClick={() => onEditMatch(fixture)}>Edit</button>
+              <button onClick={() => onDeleteMatch(fixture.match_id)} className="delete-button">
+                Delete
+              </button>
+            </span>
+          )}
+        </div>
       );
     });
   };
@@ -182,7 +182,10 @@ function FixturesList({ seasonId, teamId }) {
   return (
     <div>
       <div className="component-container">
-        <button onClick={() => setIsCalendarView(!isCalendarView)} className="calendar-toggle">
+        <button
+          onClick={() => setIsCalendarView(!isCalendarView)}
+          className="calendar-toggle"
+        >
           {isCalendarView ? "Switch to List View" : "Switch to Calendar View"}
         </button>
         {isCalendarView ? (
@@ -217,6 +220,9 @@ function FixturesList({ seasonId, teamId }) {
 FixturesList.propTypes = {
   seasonId: PropTypes.string,
   teamId: PropTypes.string,
+  onEditMatch: PropTypes.func.isRequired,
+  onDeleteMatch: PropTypes.func.isRequired,
+  isOwner: PropTypes.bool.isRequired, // Add isOwner as a required prop
 };
 
 export default FixturesList;

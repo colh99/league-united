@@ -1,22 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useParams, useLocation } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import FixturesList from "../components/fixtures/fixturesList";
-import ScheduleForm from "../components/fixtures/scheduleForm"; // Import the form component
+import ScheduleForm from "../components/fixtures/scheduleForm";
+import FixtureForm from "../components/fixtures/fixtureForm";
 import { getTeamById } from "../api/teams";
 import { getSeasonOverview } from "../api/leagues";
-import { clearSeasonSchedule } from "../api/userData"; // Import the API function to clear the schedule
+import { clearSeasonSchedule, deleteMatch } from "../api/userData";
 
 function FixturesPage() {
   const { seasonId, teamId } = useParams();
   const location = useLocation();
   const [header, setHeader] = useState("");
-  const [isOwner, setIsOwner] = useState(false); // State to track ownership
-  const [showScheduleForm, setShowScheduleForm] = useState(false); // State to toggle form visibility
-  const [seasonOverview, setSeasonOverview] = useState(null); // Store season details
+  const [isOwner, setIsOwner] = useState(false);
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [showFixtureForm, setShowFixtureForm] = useState(false);
+  const [selectedMatchData, setSelectedMatchData] = useState(null);
+  const [seasonOverview, setSeasonOverview] = useState(null);
   const isTeamPage = location.pathname.includes("/team/");
+  const formRef = useRef(null); // Ref for the form container
 
   useEffect(() => {
     const fetchHeaderAndOwnership = async () => {
@@ -27,17 +31,14 @@ function FixturesPage() {
         } else if (seasonId) {
           const seasonDetails = await getSeasonOverview(seasonId);
           setHeader(
-            seasonDetails.season.headline_year +
-              " " +
-              seasonDetails.league.name +
-              " Season"
+            `${seasonDetails.season.headline_year} ${seasonDetails.league.name} Season`
           );
           setSeasonOverview({
             ...seasonDetails.season,
-            teams: seasonDetails.teams, // Include the teams array
+            teams: seasonDetails.teams,
+            venues: seasonDetails.venues,
           });
 
-          // Check if the user owns the season
           const userId = JSON.parse(localStorage.getItem("user"))?.id;
           if (seasonDetails.season.user_id === userId) {
             setIsOwner(true);
@@ -52,15 +53,20 @@ function FixturesPage() {
   }, [seasonId, teamId, isTeamPage]);
 
   const handleGenerateScheduleClick = () => {
-    setShowScheduleForm((prev) => !prev); // Toggle the form visibility
+    setShowScheduleForm((prev) => !prev);
+    setShowFixtureForm(false);
   };
 
   const handleClearScheduleClick = () => {
-    if (window.confirm("Are you sure you want to clear the schedule? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to clear the schedule? This action cannot be undone."
+      )
+    ) {
       clearSeasonSchedule(seasonId)
         .then(() => {
           alert("Schedule cleared successfully!");
-          window.location.reload(); // Reload the page after successful clearing
+          window.location.reload();
         })
         .catch((error) => {
           console.error("Error clearing schedule:", error);
@@ -68,6 +74,47 @@ function FixturesPage() {
         });
     }
   };
+
+  const handleAddMatchClick = () => {
+    setSelectedMatchData(null);
+    setShowFixtureForm(true);
+    setShowScheduleForm(false);
+    formRef.current?.scrollIntoView({ behavior: "smooth" }); // Scroll to the form
+  };
+
+  const handleEditMatchClick = (matchData) => {
+    setSelectedMatchData(matchData);
+    setShowFixtureForm(true);
+    setShowScheduleForm(false);
+    formRef.current?.scrollIntoView({ behavior: "smooth" }); // Scroll to the form
+  };
+
+  const handleDeleteMatchClick = (matchId) => {
+    if (window.confirm("Are you sure you want to delete this match?")) {
+      console.log("Deleting match with ID:", matchId);
+      // Call the API to delete the match
+      deleteMatch(matchId)
+        .then(() => {
+          alert("Match deleted successfully!");
+          window.location.reload(); // Reload the page after deletion
+        })
+        .catch((error) => {
+          console.error("Error deleting match:", error);
+          alert("Failed to delete match. Please try again.");
+        });
+    }
+  };
+
+  const handleFixtureFormSubmit = (matchData) => {
+    console.log("Match Data Submitted:", matchData);
+    setShowFixtureForm(false);
+    // Optionally refresh the fixtures list or update the state
+  };
+
+  const handleFixtureFormCancel = () => {
+    setShowFixtureForm(false);
+  };
+
   return (
     <div>
       <Header />
@@ -75,34 +122,59 @@ function FixturesPage() {
         <h1>Fixtures</h1>
         <h2>{header}</h2>
         {!isTeamPage && isOwner && (
-          <>
-            <div>
-              <button onClick={handleGenerateScheduleClick}>
-                {showScheduleForm
-                  ? "Hide Schedule Form"
-                  : "Generate Season Schedule"}
-              </button>
-              <button onClick={handleClearScheduleClick} className="delete-button">
-                Clear Schedule
-              </button>
-            </div>
-          </>
+          <div>
+            <button onClick={handleGenerateScheduleClick}>
+              {showScheduleForm
+                ? "Hide Schedule Form"
+                : "Generate Season Schedule"}
+            </button>
+            <button onClick={handleAddMatchClick} className="add-button">
+              {showFixtureForm ? "Hide Add Match Form" : "Add Match"}
+            </button>
+            <button
+              onClick={handleClearScheduleClick}
+              className="delete-button"
+            >
+              Clear Schedule
+            </button>
+          </div>
         )}
         {showScheduleForm && seasonOverview && (
           <ScheduleForm
             seasonOverview={{
-              ...seasonOverview, // Spread the season details
+              ...seasonOverview,
             }}
             onSubmit={(scheduleData) => {
               console.log("Schedule Data Submitted:", scheduleData);
-              setShowScheduleForm(false); // Optionally hide the form after submission
+              setShowScheduleForm(false);
             }}
           />
         )}
+        <div ref={formRef}>
+          {showFixtureForm && (
+            <FixtureForm
+              matchData={selectedMatchData}
+              season_id={seasonOverview?.season_id}
+              teams={seasonOverview?.teams || []}
+              venues={seasonOverview?.venues || []}
+              onSubmit={handleFixtureFormSubmit}
+              onCancel={handleFixtureFormCancel}
+            />
+          )}
+        </div>
         {isTeamPage ? (
-          <FixturesList teamId={teamId} />
+          <FixturesList
+            teamId={teamId}
+            onEditMatch={handleEditMatchClick}
+            onDeleteMatch={handleDeleteMatchClick}
+          />
         ) : (
-          <FixturesList seasonId={seasonId} />
+          <FixturesList
+            seasonId={seasonId}
+            onEditMatch={handleEditMatchClick}
+            onDeleteMatch={handleDeleteMatchClick}
+            isOwner={isOwner}
+          />
         )}
       </div>
       <Footer />

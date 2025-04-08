@@ -50,7 +50,8 @@ const getMatchById = async (req, res) => {
             is_starter, 
             substitution_time,
             player: players (first_name, last_name)
-        )
+        ),
+        user_id
         `
     )
     .eq("match_id", matchId);

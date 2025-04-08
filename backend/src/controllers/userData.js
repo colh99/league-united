@@ -1197,6 +1197,185 @@ const clearSeasonSchedule = async (req, res) => {
   }
 };
 
+const createMatch = async (req, res) => {
+  const matchData = req.body;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader; // Extract user_id from the Authorization header
+  matchData.user_id = user_id; // Assign user_id to matchData
+
+  // Log the received data
+  console.log("Received data for createMatch:", matchData);
+
+  try {
+    // Combine date and time into a single timestamp
+    if (matchData.match_date && matchData.match_time) {
+      console.log("Combining match_date and match_time...");
+      matchData.match_date = `${matchData.match_date}T${matchData.match_time}`;
+      delete matchData.match_time; // Remove match_time as it's no longer needed
+      console.log("Combined match_date:", matchData.match_date);
+    }
+
+    // Ensure season_id is set
+    const { season_id } = matchData;
+    console.log("Checking season_id...");
+    if (!season_id) {
+      console.error("Missing season_id:", { season_id });
+      return res.status(400).json({ error: "season_id is required" });
+    }
+    console.log("season_id set:", season_id);
+
+    // Fetch the primary venue for the home team
+    console.log("Fetching primary venue for home_team_id:", matchData.home_team_id);
+    const { data: venueData, error: venueError } = await supabase
+      .from("teams_venues")
+      .select("venue_id")
+      .eq("team_id", matchData.home_team_id)
+      .eq("is_primary", true)
+      .single(); // Expect a single result
+
+    if (venueError) {
+      console.error("Error fetching primary venue:", venueError);
+      return res.status(400).json({ error: "Failed to fetch primary venue" });
+    }
+
+    if (!venueData) {
+      console.error("No primary venue found for the home team:", matchData.home_team_id);
+      return res.status(400).json({ error: "No primary venue found for the home team" });
+    }
+
+    // Set the venue_id to the home team's primary venue
+    matchData.venue_id = venueData.venue_id;
+    console.log("Primary venue set for home team:", matchData.venue_id);
+
+    // Insert the match into the database
+    console.log("Inserting match into the database:", matchData);
+    const { data, error } = await supabase
+      .from("matches")
+      .insert(matchData)
+      .select(); // Specify that we want the inserted data to be returned
+
+    if (error) {
+      console.error("Error creating match:", error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (!data || data.length === 0) {
+      console.error("No data returned from insert operation");
+      return res.status(400).json({ error: "Failed to create match" });
+    }
+
+    console.log("Match created successfully:", data);
+    res.status(201).json(data[0]);
+  } catch (err) {
+    console.error("Unexpected error in createMatch:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const updateMatch = async (req, res) => {
+  const matchId = req.params.id;
+  const matchData = req.body;
+
+  // Log the received data
+  console.log("Received data for updateMatch:", { matchId, matchData });
+
+  try {
+    // Combine date and time into a single timestamp
+    if (matchData.match_date && matchData.match_time) {
+      matchData.match_date = `${matchData.match_date}T${matchData.match_time}`;
+      delete matchData.match_time; // Remove match_time as it's no longer needed
+    }
+
+    // Fetch the existing match data
+    const { data: existingMatch, error: fetchError } = await supabase
+      .from("matches")
+      .select("*")
+      .eq("match_id", matchId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching existing match:", fetchError);
+      return res.status(400).json({ error: "Failed to fetch existing match" });
+    }
+
+    if (!existingMatch) {
+      console.error("Match not found");
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    // Filter out unchanged fields and prevent updates to season_id and user_id
+    const updatedFields = {};
+    for (const key in matchData) {
+      if (key !== "season_id" && key !== "user_id" && matchData[key] !== existingMatch[key]) {
+        updatedFields[key] = matchData[key];
+      }
+    }
+
+    // If no fields have changed, return early
+    if (Object.keys(updatedFields).length === 0) {
+      console.log("No changes detected for match:", matchId);
+      return res.status(200).json({ message: "No changes detected" });
+    }
+
+    // Perform the update
+    const { data, error } = await supabase
+      .from("matches")
+      .update(updatedFields)
+      .select("*")
+      .eq("match_id", matchId);
+
+    if (error) {
+      console.error("Error updating match:", error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (!data || data.length === 0) {
+      console.error("No data returned from update operation");
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    console.log("Match updated successfully:", data);
+    res.status(200).json(data[0]);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Delete a match
+const deleteMatch = (req, res) => {
+  const matchId = req.params.id;
+
+  supabase
+    .from("matches")
+    .delete()
+    .eq("match_id", matchId)
+    .select() // Specify that we want the deleted data to be returned
+    .then(({ data, error }) => {
+      if (error) {
+        console.log("Error deleting match:", error);
+        res.status(400).json({ error: error.message });
+      } else if (!data || data.length === 0) {
+        console.log("No data returned from delete operation");
+        res.status(404).json({ error: "Match not found" });
+      } else {
+        console.log("Match deleted successfully:", data);
+        res.status(200).json(data[0]);
+      }
+    })
+    .catch((err) => {
+      console.error("Unexpected error:", err);
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+
+
 module.exports = {
   getDashboardEntities,
   getUserLeagues,
@@ -1220,4 +1399,7 @@ module.exports = {
   deleteOfficial,
   generateSeasonSchedule,
   clearSeasonSchedule,
+  createMatch,
+  updateMatch,
+  deleteMatch,
 };

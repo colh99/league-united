@@ -659,3 +659,95 @@ export const clearSeasonSchedule = async (seasonId) => {
     console.error("Error clearing schedule:", error);
   }
 };
+
+export const createMatch = async (matchData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/userData/matches`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: userId,
+      },
+      body: JSON.stringify(matchData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Created match data", data);
+    return data;
+  } catch (error) {
+    console.error("Error creating match:", error);
+    return null;
+  }
+}
+
+export const updateMatch = async (matchId, matchData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/userData/matches/${matchId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId,
+        },
+        body: JSON.stringify(matchData),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Updated match data", data);
+    return data;
+  } catch (error) {
+    console.error("Error updating match:", error);
+    return null;
+  }
+}
+
+export const deleteMatch = async (matchId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/userData/matches/${matchId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: userId,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    console.log("Deleted match with ID", matchId);
+  } catch (error) {
+    console.error("Error deleting match:", error);
+  }
+};

@@ -84,4 +84,13 @@ router.post("/matches/generateSchedule", userDataController.generateSeasonSchedu
 // Clear a full season schedule
 router.delete("/matches/clearSchedule/:seasonId", userDataController.clearSeasonSchedule);
 
+// Create a match
+router.post("/matches", userDataController.createMatch);
+
+// Update a match
+router.put("/matches/:id", userDataController.updateMatch);
+
+// Delete a match
+router.delete("/matches/:id", userDataController.deleteMatch);
+
 module.exports = router;

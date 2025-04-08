@@ -76,23 +76,33 @@
 .fixture-list-item {
   background-color: #fff;
   padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex; /* Use flexbox for alignment */
+  justify-content: space-between; /* Space out the children */
+  align-items: center; /* Align items vertically */
+  border-bottom: 1px solid #ddd; /* Add a separator between items */
 }
 
 .fixture-list-item .date-time {
-  margin-right: 10px;
-  flex: 1;
+  flex: 1; /* Allow the date-time section to take up some space */
+  text-align: left; /* Align text to the left */
+  font-size: 0.9rem;
+  color: #555;
 }
 
 .fixture-list-item .teams {
-  font-size: 1em;
-  flex: 2;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  justify-items: center;
+  flex: 2; /* Allow the teams section to take up more space */
+  display: flex; /* Use flexbox for alignment */
+  justify-content: center; /* Center the teams horizontally */
+  align-items: center; /* Align items vertically */
+  text-align: center;
+  font-size: 1rem;
+}
+
+.fixture-list-item .fixture-actions {
+  flex: 1; /* Allow the actions section to take up some space */
+  display: flex; /* Use flexbox for alignment */
+  justify-content: flex-end; /* Align actions to the far right */
+  gap: 10px; /* Add spacing between buttons */
 }
 
 .teams span {
