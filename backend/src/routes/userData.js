@@ -93,4 +93,7 @@ router.put("/matches/:id", userDataController.updateMatch);
 // Delete a match
 router.delete("/matches/:id", userDataController.deleteMatch);
 
+// Create a match report
+router.post("/matches/report", userDataController.createMatchReport);
+
 module.exports = router;

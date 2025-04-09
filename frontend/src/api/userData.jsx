@@ -751,3 +751,36 @@ export const deleteMatch = async (matchId) => {
     console.error("Error deleting match:", error);
   }
 };
+
+
+// MATCH REPORTS
+
+export const createMatchReport = async (matchReportData) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in local storage");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/userData/matches/report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: userId,
+      },
+      body: JSON.stringify(matchReportData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json(); // Parse the JSON response
+    console.log("Created match report data", data);
+    return data;
+  } catch (error) {
+    console.error("Error creating match report:", error);
+    return null;
+  }
+}

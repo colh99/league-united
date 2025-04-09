@@ -1375,6 +1375,54 @@ const deleteMatch = (req, res) => {
     });
 };
 
+// Create a match report
+const createMatchReport = (req, res) => {
+  const matchReportData = req.body;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user_id = authHeader; // Extract user_id from the Authorization header
+  matchReportData.user_id = user_id; // Assign user_id to matchReportData
+
+  // Determine the result based on scores
+  const { home_team_score, away_team_score } = matchReportData;
+  if (home_team_score > away_team_score) {
+    matchReportData.result = "home_win";
+  } else if (home_team_score < away_team_score) {
+    matchReportData.result = "away_win";
+  } else {
+    matchReportData.result = "draw";
+  }
+
+  // Log the received data
+  console.log("Received data for createMatchReport:", matchReportData);
+
+  supabase
+    .from("match_reports")
+    .insert(matchReportData)
+    .select() // Specify that we want the inserted data to be returned
+    .then(({ data, error }) => {
+      if (error) {
+        console.log("Error creating match report:", error);
+        res.status(400).json({ error: error.message });
+      } else if (!data || data.length === 0) {
+        console.log("No data returned from insert operation");
+        res.status(400).json({ error: "Failed to create match report" });
+      } else {
+        console.log("Match report created successfully:", data);
+        res.status(201).json(data[0]);
+      }
+    })
+    .catch((err) => {
+      console.error("Unexpected error:", err);
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+
 
 module.exports = {
   getDashboardEntities,
@@ -1402,4 +1450,5 @@ module.exports = {
   createMatch,
   updateMatch,
   deleteMatch,
+  createMatchReport,
 };
